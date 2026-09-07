@@ -1,11 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
-const candidateNav = ["Overview", "Browse jobs", "My applications", "Profile"];
-const companyNav = ["Overview", "My postings", "Applicants", "Company profile"];
+const candidateNav = [
+  { label: "Overview", href: "/dashboard", ready: true },
+  { label: "Browse jobs", href: "/jobs", ready: true },
+  { label: "My applications", href: "#", ready: false },
+  { label: "Profile", href: "#", ready: false },
+];
+
+const companyNav = [
+  { label: "Overview", href: "/dashboard", ready: true },
+  { label: "My postings", href: "/dashboard/jobs", ready: true },
+  { label: "Company profile", href: "/dashboard/company", ready: true },
+  { label: "Applicants", href: "#", ready: false },
+];
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
@@ -60,29 +72,37 @@ export default function DashboardPage() {
           <span className="font-display text-2xl text-chalk">Job Platform</span>
 
           <nav className="mt-10 space-y-1">
-            {nav.map((item, i) => (
-              <button
-                key={item}
-                disabled={i !== 0}
-                className={
-                  i === 0
-                    ? "flex w-full items-center gap-3 rounded-lg bg-surface-2 px-3 py-2.5 text-sm font-medium text-chalk"
-                    : "flex w-full cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-fog/40"
-                }
-              >
-                <span
+            {nav.map((item, i) =>
+              item.ready ? (
+                <Link
+                  key={item.label}
+                  href={item.href}
                   className={
                     i === 0
-                      ? `h-1.5 w-1.5 rounded-full ${dot}`
-                      : "h-1.5 w-1.5 rounded-full bg-line"
+                      ? "flex w-full items-center gap-3 rounded-lg bg-surface-2 px-3 py-2.5 text-sm font-medium text-chalk"
+                      : "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-fog transition hover:bg-surface-2/60 hover:text-chalk"
                   }
-                />
-                {item}
-                {i !== 0 && (
+                >
+                  <span
+                    className={
+                      i === 0
+                        ? `h-1.5 w-1.5 rounded-full ${dot}`
+                        : "h-1.5 w-1.5 rounded-full bg-line"
+                    }
+                  />
+                  {item.label}
+                </Link>
+              ) : (
+                <span
+                  key={item.label}
+                  className="flex w-full cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-fog/40"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-line" />
+                  {item.label}
                   <span className="ml-auto text-[10px] text-fog/30">Soon</span>
-                )}
-              </button>
-            ))}
+                </span>
+              ),
+            )}
           </nav>
 
           <div className="mt-auto border-t border-line pt-6">
@@ -176,12 +196,12 @@ export default function DashboardPage() {
                       ? "Once you apply to an opening, it will show up here."
                       : "Once you publish a role, applicants will show up here."}
                   </p>
-                  <button
-                    disabled
-                    className="mt-6 cursor-not-allowed rounded-lg border border-line px-5 py-2.5 text-sm text-fog/50"
+                  <Link
+                    href={isCandidate ? "/jobs" : "/dashboard/jobs"}
+                    className="mt-6 rounded-lg bg-gold px-5 py-2.5 text-sm font-semibold text-night transition hover:bg-gold-soft"
                   >
                     {isCandidate ? "Browse openings" : "Publish a role"}
-                  </button>
+                  </Link>
                 </div>
               </section>
 
@@ -204,18 +224,19 @@ export default function DashboardPage() {
                       {isCandidate ? "Candidate" : "Company"}
                     </dd>
                   </div>
-                  <div>
-                    <dt className="text-fog">Identifier</dt>
-                    <dd className="mt-1 break-all text-xs text-fog/60">
-                      {user.id}
-                    </dd>
-                  </div>
                 </dl>
-                <div className="hairline my-6" />
-                <p className="text-xs text-fog/60">
-                  Your company profile with description, location and website
-                  becomes available once that module is added.
-                </p>
+
+                {!isCandidate && (
+                  <>
+                    <div className="hairline my-6" />
+                    <Link
+                      href="/dashboard/company"
+                      className="text-sm text-gold-soft underline underline-offset-4"
+                    >
+                      Edit company profile
+                    </Link>
+                  </>
+                )}
               </section>
             </div>
           </main>
