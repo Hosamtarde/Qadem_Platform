@@ -5,6 +5,7 @@ import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
 import { AuthModule } from './modules/auth/auth.module';
 import { CompaniesModule } from './modules/companies/companies.module';
+import { JobsModule } from './modules/jobs/jobs.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
     }),    
     AuthModule,
     CompaniesModule,
+    JobsModule,
   ],
 })
 export class AppModule {}
