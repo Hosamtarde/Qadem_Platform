@@ -11,11 +11,14 @@ import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../users/entities/user.entity';
+import { CompaniesService } from '../companies/companies.service';
+import { UserRole } from '../../common/enums';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly companiesService: CompaniesService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -34,6 +37,10 @@ export class AuthService {
       fullName: dto.fullName,
       role: dto.role,
     });
+
+    if (user.role === UserRole.COMPANY) {
+      await this.companiesService.createForUser(user.id, user.fullName);
+    }
 
     return this.issueTokens(user);
   }
@@ -57,7 +64,7 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
-    async refresh(userId: string, refreshToken: string) {
+  async refresh(userId: string, refreshToken: string) {
     const user = await this.usersService.findByIdWithRefreshToken(userId);
 
     if (!user || !user.hashedRefreshToken) {
