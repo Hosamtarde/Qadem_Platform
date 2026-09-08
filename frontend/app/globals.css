@@ -43,6 +43,26 @@
   .surface {
     background-color: var(--color-panel);
     border: 1px solid var(--color-line);
+      .marquee {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: slide 38s linear infinite;
+  }
+
+  .marquee-rev {
+    animation-direction: reverse;
+    animation-duration: 46s;
+  }
+
+  .marquee-wrap:hover .marquee {
+    animation-play-state: paused;
+  }
+
+  .fade-sides {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
   }
 
   .surface-hover {
@@ -156,6 +176,32 @@
     opacity: 1;
     transform: none;
   }
+
+    .marquee {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: slide 38s linear infinite;
+  }
+
+  .marquee-rev {
+    animation-direction: reverse;
+    animation-duration: 46s;
+  }
+
+  .marquee-wrap:hover .marquee {
+    animation-play-state: paused;
+  }
+
+  .fade-sides {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  }
+}
+
+@keyframes slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -167,4 +213,5 @@
   .surface-hover:hover {
     transform: none;
   }
+  .marquee { animation: none; }
 }

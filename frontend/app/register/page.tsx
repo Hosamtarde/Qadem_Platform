@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { ApiRequestError } from "@/lib/api";
 import { UserRole } from "@/lib/types";
 import Particles from "@/components/particles";
+import Logo from "@/components/logo";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -45,11 +46,8 @@ export default function RegisterPage() {
         <div className="grid-lines" />
         <div className="glow" />
 
-        <Link
-          href="/"
-          className="relative z-10 font-display text-xl font-bold text-text"
-        >
-          Qadem<span className="text-brand">.</span>
+        <Link href="/" className="relative z-10">
+          <Logo />
         </Link>
 
         <div className="relative z-10 max-w-md">
@@ -65,7 +63,7 @@ export default function RegisterPage() {
         </div>
 
         <p className="relative z-10 text-xs text-muted/60">
-          NestJS ? PostgreSQL ? Next.js
+          NestJS - PostgreSQL - Next.js
         </p>
       </aside>
 
@@ -73,11 +71,8 @@ export default function RegisterPage() {
         <div className="glow lg:hidden" />
 
         <div className="relative z-10 w-full max-w-sm">
-          <Link
-            href="/"
-            className="font-display text-xl font-bold text-text lg:hidden"
-          >
-            Qadem<span className="text-brand">.</span>
+          <Link href="/" className="lg:hidden">
+            <Logo />
           </Link>
 
           <h1 className="mt-8 font-display text-3xl font-bold text-text lg:mt-0">

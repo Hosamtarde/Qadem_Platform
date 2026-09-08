@@ -5,16 +5,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { getMyCompany, updateMyCompany } from "@/lib/companies";
+import { listMyJobs } from "@/lib/jobs";
 import { ApiRequestError } from "@/lib/api";
-import { Company } from "@/lib/types";
-import Reveal from "@/components/reveal";
+import { Company, Job, JOB_TYPE_LABELS } from "@/lib/types";
+import Logo from "@/components/logo";
 
 export default function CompanyProfilePage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [company, setCompany] = useState<Company | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -33,22 +36,29 @@ export default function CompanyProfilePage() {
 
   useEffect(() => {
     if (!user || user.role !== "COMPANY") return;
-    getMyCompany()
-      .then((c) => {
+    Promise.all([getMyCompany(), listMyJobs().catch(() => [])])
+      .then(([c, j]) => {
         setCompany(c);
-        setName(c.name);
-        setDescription(c.description ?? "");
-        setWebsite(c.website ?? "");
-        setLocation(c.location ?? "");
+        setJobs(j);
       })
       .catch(() => setError("Could not load your company profile."))
       .finally(() => setLoading(false));
   }, [user]);
 
+  function startEditing() {
+    if (!company) return;
+    setName(company.name);
+    setDescription(company.description ?? "");
+    setWebsite(company.website ?? "");
+    setLocation(company.location ?? "");
+    setError("");
+    setSaved(false);
+    setEditing(true);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setSaved(false);
     setSaving(true);
     try {
       const updated = await updateMyCompany({
@@ -58,6 +68,7 @@ export default function CompanyProfilePage() {
         location: location || undefined,
       });
       setCompany(updated);
+      setEditing(false);
       setSaved(true);
     } catch (err) {
       if (err instanceof ApiRequestError) {
@@ -71,50 +82,182 @@ export default function CompanyProfilePage() {
   }
 
   const field =
-    "mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-chalk placeholder:text-fog/40 outline-none transition focus:border-magenta/60";
+    "mt-2 w-full rounded-lg border border-line bg-panel px-4 py-3 text-text placeholder:text-muted/50 outline-none transition focus:border-brand";
 
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-fog">Loading</p>
+        <p className="text-muted">Loading</p>
       </div>
     );
   }
 
-  return (
-    <div className="relative min-h-screen overflow-hidden">
-      <div className="aura" />
+  const initials = company
+    ? company.name
+        .split(" ")
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join("")
+    : "";
 
-      <header className="relative z-10 mx-auto flex max-w-3xl items-center justify-between px-6 py-6">
-        <Link href="/dashboard" className="font-display text-2xl font-bold text-chalk">
-          Job<span className="text-cyan">.</span>Platform
-        </Link>
-        <Link
-          href="/dashboard"
-          className="rounded-lg border border-line px-4 py-2 text-sm text-fog transition hover:border-cyan/50 hover:text-chalk"
-        >
-          Back
-        </Link>
+  const liveJobs = jobs.filter((j) => j.isActive);
+  const cleanUrl = company?.website
+    ? company.website.replace(/^https?:\/\//, "")
+    : "";
+
+  return (
+    <div className="relative min-h-screen">
+      <header className="relative z-20 border-b border-line-soft">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
+          <Link href="/dashboard">
+            <Logo />
+          </Link>
+          <Link href="/dashboard" className="btn-ghost rounded-lg px-4 py-2 text-sm">
+            Back
+          </Link>
+        </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-3xl px-6 pb-24">
-        <Reveal>
-          <p className="font-display text-xs tracking-[0.25em] text-magenta">
-            PUBLIC PROFILE
-          </p>
-          <h1 className="mt-4 font-display text-5xl font-bold text-chalk">
-            Company profile
-          </h1>
-          <p className="mt-4 text-fog">
-            This is what candidates see next to your openings.
-          </p>
-        </Reveal>
+      <main className="mx-auto max-w-4xl px-6 py-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-text">
+              Company profile
+            </h1>
+            <p className="mt-2 text-sm text-muted">
+              {editing
+                ? "Changes are visible to candidates as soon as you save."
+                : "This is what candidates see next to your openings."}
+            </p>
+          </div>
 
-        <Reveal delay={100}>
-          <form onSubmit={handleSubmit} className="card mt-10 rounded-2xl p-8">
+          {!editing && (
+            <button
+              onClick={startEditing}
+              className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
+            >
+              Edit profile
+            </button>
+          )}
+        </div>
+
+        {saved && !editing && (
+          <p className="mt-6 rounded-lg border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">
+            Profile saved
+          </p>
+        )}
+
+        {error && !editing && (
+          <p className="mt-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+            {error}
+          </p>
+        )}
+
+        {!editing && company && (
+          <>
+            <section className="surface mt-8 rounded-xl p-8">
+              <div className="flex flex-wrap items-start gap-5">
+                <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-line bg-panel-2 font-display text-lg font-bold text-brand-soft">
+                  {initials}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-2xl font-bold text-text">
+                    {company.name}
+                  </h2>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted">
+                    {company.location ? <span>{company.location}</span> : null}
+                                        {company.website ? (
+                      <a href={company.website} target="_blank" rel="noreferrer" className="text-brand underline underline-offset-4 transition hover:text-brand-soft">{cleanUrl}</a>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rule my-7" />
+
+              {company.description ? (
+                <p className="whitespace-pre-line text-sm leading-relaxed text-muted">
+                  {company.description}
+                </p>
+              ) : (
+                <p className="text-sm text-muted/60">
+                  No description yet. Candidates see this space next to every
+                  role you publish, so it is worth filling in.
+                </p>
+              )}
+            </section>
+
+            <div className="mt-4 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
+              <div className="bg-panel p-6">
+                <p className="text-sm text-muted">Total postings</p>
+                <p className="mt-2 font-display text-2xl font-bold text-text">
+                  {jobs.length}
+                </p>
+              </div>
+              <div className="bg-panel p-6">
+                <p className="text-sm text-muted">Live right now</p>
+                <p className="mt-2 font-display text-2xl font-bold text-text">
+                  {liveJobs.length}
+                </p>
+              </div>
+              <div className="bg-panel p-6">
+                <p className="text-sm text-muted">Location</p>
+                <p className="mt-2 font-display text-2xl font-bold text-text">
+                  {company.location ?? "-"}
+                </p>
+              </div>
+            </div>
+
+            <section className="mt-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-brand">
+                  Live openings
+                </h2>
+                <Link
+                  href="/dashboard/jobs"
+                  className="text-sm text-muted underline underline-offset-4 transition hover:text-text"
+                >
+                  Manage postings
+                </Link>
+              </div>
+
+              {liveJobs.length === 0 ? (
+                <div className="surface mt-4 rounded-xl px-6 py-12 text-center">
+                  <p className="text-sm text-muted">
+                    No live openings right now.
+                  </p>
+                </div>
+              ) : (
+                <ul className="mt-4 space-y-2">
+                  {liveJobs.map((job) => (
+                    <li
+                      key={job.id}
+                      className="surface flex flex-wrap items-center justify-between gap-3 rounded-lg px-5 py-4"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-text">
+                          {job.title}
+                        </p>
+                        <p className="mt-1 text-xs text-muted">
+                          {job.location}
+                        </p>
+                      </div>
+                      <span className="badge badge-neutral">
+                        {JOB_TYPE_LABELS[job.type]}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
+        )}
+
+        {editing && (
+          <form onSubmit={handleSubmit} className="surface mt-8 rounded-xl p-8">
             <div className="space-y-6">
               <div>
-                <label className="text-sm text-fog">Company name</label>
+                <label className="text-sm text-muted">Company name</label>
                 <input
                   type="text"
                   required
@@ -126,7 +269,7 @@ export default function CompanyProfilePage() {
               </div>
 
               <div>
-                <label className="text-sm text-fog">About the company</label>
+                <label className="text-sm text-muted">About the company</label>
                 <textarea
                   rows={6}
                   value={description}
@@ -138,7 +281,7 @@ export default function CompanyProfilePage() {
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm text-fog">Location</label>
+                  <label className="text-sm text-muted">Location</label>
                   <input
                     type="text"
                     value={location}
@@ -149,7 +292,7 @@ export default function CompanyProfilePage() {
                 </div>
 
                 <div>
-                  <label className="text-sm text-fog">Website</label>
+                  <label className="text-sm text-muted">Website</label>
                   <input
                     type="url"
                     value={website}
@@ -162,31 +305,28 @@ export default function CompanyProfilePage() {
             </div>
 
             {error && (
-              <p className="mt-6 rounded-xl border border-magenta/40 bg-magenta/10 px-4 py-3 text-sm text-magenta">
+              <p className="mt-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
                 {error}
               </p>
             )}
 
-            {saved && (
-              <p className="mt-6 rounded-xl border border-cyan/40 bg-cyan/10 px-4 py-3 text-sm text-cyan">
-                Profile saved
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn-glow btn-glow-magenta mt-8 rounded-xl bg-magenta px-7 py-3.5 font-bold text-void disabled:opacity-50"
-            >
-              {saving ? "Saving" : "Save changes"}
-            </button>
+            <div className="mt-8 flex gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn-primary rounded-lg px-7 py-3 font-semibold disabled:opacity-50"
+              >
+                {saving ? "Saving" : "Save changes"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="btn-ghost rounded-lg px-7 py-3 font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
           </form>
-        </Reveal>
-
-        {company && (
-          <p className="mt-6 text-xs text-fog/40">
-            Profile identifier: {company.id}
-          </p>
         )}
       </main>
     </div>
