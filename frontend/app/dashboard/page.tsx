@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { listMyJobs } from "@/lib/jobs";
 
 const candidateNav = [
   { label: "Overview", href: "/dashboard", ready: true },
@@ -23,9 +24,25 @@ export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
 
+  const [totalJobs, setTotalJobs] = useState<number | null>(null);
+  const [liveJobs, setLiveJobs] = useState<number | null>(null);
+
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
+
+  useEffect(() => {
+    if (!user || user.role !== "COMPANY") return;
+    listMyJobs()
+      .then((jobs) => {
+        setTotalJobs(jobs.length);
+        setLiveJobs(jobs.filter((j) => j.isActive).length);
+      })
+      .catch(() => {
+        setTotalJobs(0);
+        setLiveJobs(0);
+      });
+  }, [user]);
 
   if (loading) {
     return (
@@ -39,37 +56,41 @@ export default function DashboardPage() {
 
   const isCandidate = user.role === "CANDIDATE";
   const nav = isCandidate ? candidateNav : companyNav;
-  const accent = isCandidate ? "text-jade" : "text-gold";
-  const dot = isCandidate ? "bg-jade" : "bg-gold";
+  const accent = isCandidate ? "text-cyan" : "text-magenta";
+  const dot = isCandidate ? "bg-cyan" : "bg-magenta";
   const initials = user.fullName
     .split(" ")
     .map((w) => w[0])
     .slice(0, 2)
     .join("");
 
+  const show = (n: number | null) => (n === null ? "-" : String(n));
+
   const stats = isCandidate
     ? [
-        { label: "Applications sent", value: "0" },
-        { label: "Under review", value: "0" },
-        { label: "Accepted", value: "0" },
-        { label: "Saved jobs", value: "0" },
+        { label: "Applications sent", value: "-" },
+        { label: "Under review", value: "-" },
+        { label: "Accepted", value: "-" },
+        { label: "Saved jobs", value: "-" },
       ]
     : [
-        { label: "Open positions", value: "0" },
-        { label: "Total applicants", value: "0" },
-        { label: "Awaiting review", value: "0" },
-        { label: "Hired", value: "0" },
+        { label: "Total postings", value: show(totalJobs) },
+        { label: "Live postings", value: show(liveJobs) },
+        { label: "Total applicants", value: "-" },
+        { label: "Awaiting review", value: "-" },
       ];
 
   const stages = ["Submitted", "Reviewing", "Accepted", "Rejected"];
 
   return (
     <div className="relative min-h-screen">
-      <div className="halo" />
+      <div className="aura" />
 
       <div className="relative z-10 flex min-h-screen">
-        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface/70 p-6 lg:flex">
-          <span className="font-display text-2xl text-chalk">Job Platform</span>
+        <aside className="hidden w-64 shrink-0 flex-col border-r border-line bg-surface/60 p-6 lg:flex">
+          <Link href="/" className="font-display text-2xl font-bold text-chalk">
+            Job<span className="text-cyan">.</span>Platform
+          </Link>
 
           <nav className="mt-10 space-y-1">
             {nav.map((item, i) =>
@@ -79,7 +100,7 @@ export default function DashboardPage() {
                   href={item.href}
                   className={
                     i === 0
-                      ? "flex w-full items-center gap-3 rounded-lg bg-surface-2 px-3 py-2.5 text-sm font-medium text-chalk"
+                      ? "flex w-full items-center gap-3 rounded-lg bg-surface-2 px-3 py-2.5 text-sm font-semibold text-chalk"
                       : "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-fog transition hover:bg-surface-2/60 hover:text-chalk"
                   }
                 >
@@ -107,7 +128,13 @@ export default function DashboardPage() {
 
           <div className="mt-auto border-t border-line pt-6">
             <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface-2 text-xs font-semibold text-chalk">
+              <span
+                className={
+                  isCandidate
+                    ? "tile tile-cyan h-9 w-9 rounded-lg font-display text-xs font-bold"
+                    : "tile tile-magenta h-9 w-9 rounded-lg font-display text-xs font-bold"
+                }
+              >
                 {initials}
               </span>
               <div className="min-w-0">
@@ -119,7 +146,7 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={logout}
-              className="mt-4 w-full rounded-lg border border-line py-2 text-sm text-fog transition hover:border-gold/50 hover:text-chalk"
+              className="mt-4 w-full rounded-lg border border-line py-2 text-sm text-fog transition hover:border-cyan/50 hover:text-chalk"
             >
               Sign out
             </button>
@@ -129,10 +156,10 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-hidden">
           <header className="flex items-center justify-between border-b border-line px-6 py-5 lg:px-10">
             <div>
-              <p className="text-sm text-fog">
-                {isCandidate ? "Candidate workspace" : "Company workspace"}
+              <p className="font-display text-xs tracking-[0.25em] text-fog">
+                {isCandidate ? "CANDIDATE WORKSPACE" : "COMPANY WORKSPACE"}
               </p>
-              <h1 className="mt-1 font-display text-3xl text-chalk">
+              <h1 className="mt-2 font-display text-3xl font-bold text-chalk">
                 {user.fullName}
               </h1>
             </div>
@@ -145,68 +172,72 @@ export default function DashboardPage() {
           </header>
 
           <main className="px-6 py-8 lg:px-10">
-            <div className="rise rise-1 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
               {stats.map((s) => (
-                <div key={s.label} className="bg-surface/80 p-6">
+                <div key={s.label} className="bg-surface p-6">
                   <p className="text-sm text-fog">{s.label}</p>
-                  <p className="mt-3 font-display text-4xl text-chalk">
+                  <p className="mt-3 font-display text-4xl font-bold text-chalk">
                     {s.value}
                   </p>
                 </div>
               ))}
             </div>
 
-            <section className="rise rise-2 panel mt-6 rounded-xl p-7">
-              <h2 className="text-sm font-medium text-chalk">
-                Application pipeline
+            <section className="card mt-5 rounded-2xl p-7">
+              <h2 className="font-display text-sm font-bold tracking-wider text-cyan">
+                APPLICATION PIPELINE
               </h2>
-              <p className="mt-1 text-sm text-fog">
-                {isCandidate
-                  ? "Where your applications stand."
-                  : "Where your applicants stand."}
+              <p className="mt-2 text-sm text-fog">
+                Available once the applications module is added.
               </p>
 
-              <div className="mt-7 flex gap-1.5">
+              <div className="mt-8 flex gap-2">
                 {stages.map((stage) => (
                   <div key={stage} className="flex-1">
-                    <div className="h-1.5 rounded-full bg-line" />
+                    <div className="h-1 rounded-full bg-line" />
                     <p className="mt-3 text-xs text-fog">{stage}</p>
-                    <p className="mt-1 font-display text-2xl text-chalk">0</p>
+                    <p className="mt-1 font-display text-2xl font-bold text-fog/30">
+                      -
+                    </p>
                   </div>
                 ))}
               </div>
             </section>
 
-            <div className="rise rise-3 mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-              <section className="panel rounded-xl p-7">
+            <div className="mt-5 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
+              <section className="card rounded-2xl p-7">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-medium text-chalk">
-                    Recent activity
+                  <h2 className="font-display text-sm font-bold tracking-wider text-cyan">
+                    RECENT ACTIVITY
                   </h2>
                   <span className="text-xs text-fog">Last 30 days</span>
                 </div>
 
                 <div className="mt-10 flex flex-col items-center py-8 text-center">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-line">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-line">
                     <span className={`h-2 w-2 rounded-full ${dot}`} />
                   </span>
-                  <p className="mt-5 text-chalk">Nothing here yet</p>
-                  <p className="mt-1 max-w-xs text-sm text-fog">
+                  <p className="mt-6 font-display font-bold text-chalk">
+                    Nothing here yet
+                  </p>
+                  <p className="mt-2 max-w-xs text-sm text-fog">
                     {isCandidate
                       ? "Once you apply to an opening, it will show up here."
-                      : "Once you publish a role, applicants will show up here."}
+                      : "Once candidates apply to your roles, they will show up here."}
                   </p>
                   <Link
                     href={isCandidate ? "/jobs" : "/dashboard/jobs"}
-                    className="mt-6 rounded-lg bg-gold px-5 py-2.5 text-sm font-semibold text-night transition hover:bg-gold-soft"
+                    className="btn-glow mt-7 rounded-xl bg-cyan px-6 py-3 text-sm font-bold text-void"
                   >
-                    {isCandidate ? "Browse openings" : "Publish a role"}
+                    {isCandidate ? "Browse openings" : "Manage postings"}
                   </Link>
                 </div>
               </section>
 
-              <section className="panel rounded-xl p-7">
-                <h2 className="text-sm font-medium text-chalk">Account</h2>
+              <section className="card rounded-2xl p-7">
+                <h2 className="font-display text-sm font-bold tracking-wider text-cyan">
+                  ACCOUNT
+                </h2>
                 <dl className="mt-6 space-y-5 text-sm">
                   <div>
                     <dt className="text-fog">
@@ -220,7 +251,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <dt className="text-fog">Account type</dt>
-                    <dd className={`mt-1 ${accent}`}>
+                    <dd className={`mt-1 font-semibold ${accent}`}>
                       {isCandidate ? "Candidate" : "Company"}
                     </dd>
                   </div>
@@ -228,10 +259,10 @@ export default function DashboardPage() {
 
                 {!isCandidate && (
                   <>
-                    <div className="hairline my-6" />
+                    <div className="beam my-6" />
                     <Link
                       href="/dashboard/company"
-                      className="text-sm text-gold-soft underline underline-offset-4"
+                      className="text-sm text-cyan underline underline-offset-4 transition hover:text-chalk"
                     >
                       Edit company profile
                     </Link>

@@ -1,12 +1,11 @@
-﻿import type { Metadata } from "next";
-import { Instrument_Serif, Manrope } from "next/font/google";
+import type { Metadata } from "next";
+import { Space_Grotesk, Manrope } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
-const display = Instrument_Serif({
-  weight: "400",
+const display = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-instrument-serif",
+  variable: "--font-space-grotesk",
 });
 
 const sans = Manrope({
@@ -16,7 +15,8 @@ const sans = Manrope({
 
 export const metadata: Metadata = {
   title: "Job Platform",
-  description: "Companies post openings. Candidates apply and track every application.",
+  description:
+    "Companies post openings. Candidates apply and track every application.",
 };
 
 export default function RootLayout({
@@ -26,7 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${display.variable} ${sans.variable} font-sans antialiased`}>
+      <body
+        className={`${display.variable} ${sans.variable} font-sans antialiased`}
+      >
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
