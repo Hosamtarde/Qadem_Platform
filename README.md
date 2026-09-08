@@ -1,6 +1,6 @@
 <div align="center">
 
-# Qadem
+<img src="docs/logo.svg" alt="Qadem" width="220" />
 
 **A jobs and internships platform built for the Palestinian tech market.**
 
