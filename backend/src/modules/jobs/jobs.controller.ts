@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from "@nestjs/swagger";
 import { JobsService } from "./jobs.service";
@@ -17,6 +18,7 @@ import { UpdateJobDto } from "./dto/update-job.dto";
 import { JobResponseDto } from "./dto/job-response.dto";
 import { CurrentUser, Public, Roles } from "../../common/decorators";
 import { UserRole } from "../../common/enums";
+import { FilterJobsDto } from "./dto/filter-jobs.dto";
 
 @ApiTags("jobs")
 @Controller("jobs")
@@ -33,11 +35,13 @@ export class JobsController {
   }
 
   @Public()
-  @ApiOkResponse({ type: [JobResponseDto] })
   @Get()
-  async findAll() {
-    const jobs = await this.jobsService.findAllActive();
-    return jobs.map((job) => new JobResponseDto(job));
+  async findAll(@Query() filters: FilterJobsDto) {
+    const result = await this.jobsService.findAllActive(filters);
+    return {
+      data: result.data.map((job) => new JobResponseDto(job)),
+      meta: result.meta,
+    };
   }
 
   @ApiBearerAuth()
