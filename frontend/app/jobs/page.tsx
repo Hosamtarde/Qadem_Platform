@@ -1,53 +1,79 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { listJobs } from "@/lib/jobs";
-import { Job, JOB_TYPE_LABELS } from "@/lib/types";
+import { Job, JobType, JobFilters, PaginationMeta, JOB_TYPE_LABELS } from "@/lib/types";
 import Logo from "@/components/logo";
 
-type Tab = "ALL" | "JOBS" | "INTERNSHIP";
+const TYPES: (JobType | "ALL")[] = ["ALL", "FULL_TIME", "PART_TIME", "INTERNSHIP"];
+const CITIES = ["Ramallah", "Nablus", "Hebron", "Rawabi"];
+const SORTS: { key: "newest" | "oldest" | "salary"; label: string }[] = [
+  { key: "newest", label: "Newest" },
+  { key: "oldest", label: "Oldest" },
+  { key: "salary", label: "Highest salary" },
+];
 
 function initials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("");
+  return name.split(" ").map((w) => w[0]).slice(0, 2).join("");
 }
 
-export default function JobsPage() {
+function JobsView() {
+  const router = useRouter();
+  const params = useSearchParams();
+
+  const search = params.get("search") ?? "";
+  const type = (params.get("type") as JobType | null) ?? null;
+  const location = params.get("location") ?? "";
+  const sortBy = (params.get("sortBy") as JobFilters["sortBy"]) ?? "newest";
+  const page = Number(params.get("page") ?? 1);
+
+  const [searchInput, setSearchInput] = useState(search);
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState<Tab>("ALL");
-  const [city, setCity] = useState<string>("ALL");
 
   useEffect(() => {
-    listJobs()
-      .then(setJobs)
+    setSearchInput(search);
+  }, [search]);
+
+  const push = useCallback(
+    (next: Record<string, string | null>) => {
+      const sp = new URLSearchParams(params.toString());
+      Object.entries(next).forEach(([key, value]) => {
+        if (value === null || value === "") sp.delete(key);
+        else sp.set(key, value);
+      });
+      if (!("page" in next)) sp.delete("page");
+      const qs = sp.toString();
+      router.push(qs ? `/jobs?${qs}` : "/jobs");
+    },
+    [params, router],
+  );
+
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    listJobs({
+      search: search || undefined,
+      type: type ?? undefined,
+      location: location || undefined,
+      sortBy,
+      page,
+      limit: 9,
+    })
+      .then((res) => {
+        setJobs(res.data);
+        setMeta(res.meta);
+      })
       .catch(() => setError("Could not load openings. Try again shortly."))
       .finally(() => setLoading(false));
-  }, []);
+  }, [search, type, location, sortBy, page]);
 
-  const citiesList = useMemo(() => {
-    const set = new Set(jobs.map((j) => j.location));
-    return Array.from(set).sort();
-  }, [jobs]);
-
-  const visible = useMemo(() => {
-    let list = jobs;
-    if (tab === "INTERNSHIP") list = list.filter((j) => j.type === "INTERNSHIP");
-    if (tab === "JOBS") list = list.filter((j) => j.type !== "INTERNSHIP");
-    if (city !== "ALL") list = list.filter((j) => j.location === city);
-    return list;
-  }, [jobs, tab, city]);
-
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "ALL", label: "All" },
-    { key: "JOBS", label: "Jobs" },
-    { key: "INTERNSHIP", label: "Internships" },
-  ];
+  const activeCount =
+    (search ? 1 : 0) + (type ? 1 : 0) + (location ? 1 : 0);
 
   return (
     <div className="relative min-h-screen">
@@ -68,53 +94,89 @@ export default function JobsPage() {
         </h1>
         <p className="mt-2 text-sm text-muted">
           {loading
-            ? "Loading"
-            : `${visible.length} ${visible.length === 1 ? "role" : "roles"} available`}
+            ? "Searching"
+            : meta
+              ? `${meta.total} ${meta.total === 1 ? "role" : "roles"} found`
+              : ""}
         </p>
 
-        <div className="mt-7 flex flex-wrap items-center gap-3">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            push({ search: searchInput });
+          }}
+          className="mt-7 flex gap-2"
+        >
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search by title or description"
+            className="flex-1 rounded-lg border border-line bg-panel px-4 py-3 text-text placeholder:text-muted/50 outline-none transition focus:border-brand"
+          />
+          <button
+            type="submit"
+            className="btn-primary rounded-lg px-6 py-3 text-sm font-semibold"
+          >
+            Search
+          </button>
+        </form>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <div className="inline-flex gap-1 rounded-lg border border-line bg-panel p-1">
-            {tabs.map((t) => (
+            {TYPES.map((t) => {
+              const active = t === "ALL" ? !type : type === t;
+              return (
+                <button
+                  key={t}
+                  onClick={() => push({ type: t === "ALL" ? null : t })}
+                  className={
+                    active
+                      ? "btn-primary rounded-md px-4 py-2 text-xs font-semibold"
+                      : "rounded-md px-4 py-2 text-xs text-muted transition hover:text-text"
+                  }
+                >
+                  {t === "ALL" ? "All types" : JOB_TYPE_LABELS[t as JobType]}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="inline-flex flex-wrap gap-1.5">
+            {CITIES.map((c) => (
               <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
+                key={c}
+                onClick={() => push({ location: location === c ? null : c })}
                 className={
-                  tab === t.key
-                    ? "btn-primary rounded-md px-4 py-2 text-sm font-semibold"
-                    : "rounded-md px-4 py-2 text-sm text-muted transition hover:text-text"
+                  location === c
+                    ? "rounded-lg border border-brand/60 bg-panel-2 px-4 py-2 text-xs font-medium text-brand-soft"
+                    : "btn-ghost rounded-lg px-4 py-2 text-xs"
                 }
               >
-                {t.label}
+                {c}
               </button>
             ))}
           </div>
 
-          {citiesList.length > 1 && (
-            <div className="inline-flex flex-wrap gap-2">
-              <button
-                onClick={() => setCity("ALL")}
-                className={
-                  city === "ALL"
-                    ? "rounded-lg border border-brand/60 bg-panel-2 px-4 py-2 text-sm font-medium text-brand-soft"
-                    : "btn-ghost rounded-lg px-4 py-2 text-sm"
-                }
-              >
-                Everywhere
-              </button>
-              {citiesList.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setCity(c)}
-                  className={
-                    city === c
-                      ? "rounded-lg border border-brand/60 bg-panel-2 px-4 py-2 text-sm font-medium text-brand-soft"
-                      : "btn-ghost rounded-lg px-4 py-2 text-sm"
-                  }
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
+          <select
+            value={sortBy}
+            onChange={(e) => push({ sortBy: e.target.value })}
+            className="rounded-lg border border-line bg-panel px-3 py-2 text-xs text-muted outline-none transition focus:border-brand"
+          >
+            {SORTS.map((s) => (
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+
+          {activeCount > 0 && (
+            <button
+              onClick={() => router.push("/jobs")}
+              className="px-3 py-2 text-xs text-muted underline underline-offset-4 transition hover:text-text"
+            >
+              Clear filters
+            </button>
           )}
         </div>
 
@@ -124,17 +186,17 @@ export default function JobsPage() {
           </p>
         )}
 
-        {!loading && !error && visible.length === 0 && (
+        {!loading && !error && jobs.length === 0 && (
           <div className="surface mt-8 rounded-xl px-8 py-20 text-center">
-            <p className="font-semibold text-text">Nothing here yet</p>
+            <p className="font-semibold text-text">No matches</p>
             <p className="mt-2 text-sm text-muted">
-              No openings match these filters.
+              Try a different search term or clear some filters.
             </p>
           </div>
         )}
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((job) => {
+          {jobs.map((job) => {
             const isIntern = job.type === "INTERNSHIP";
             const org = job.company?.name ?? "Company";
             return (
@@ -151,7 +213,9 @@ export default function JobsPage() {
                     <p className="truncate text-sm font-medium text-text">
                       {org}
                     </p>
-                    <p className="truncate text-xs text-muted">{job.location}</p>
+                    <p className="truncate text-xs text-muted">
+                      {job.location}
+                    </p>
                   </div>
                 </div>
 
@@ -183,7 +247,55 @@ export default function JobsPage() {
             );
           })}
         </div>
+
+        {meta && meta.totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-center gap-2">
+            <button
+              disabled={page <= 1}
+              onClick={() => push({ page: String(page - 1) })}
+              className="btn-ghost rounded-lg px-4 py-2 text-sm disabled:opacity-40"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((n) => (
+              <button
+                key={n}
+                onClick={() => push({ page: String(n) })}
+                className={
+                  n === page
+                    ? "btn-primary h-9 w-9 rounded-lg text-sm font-semibold"
+                    : "btn-ghost h-9 w-9 rounded-lg text-sm"
+                }
+              >
+                {n}
+              </button>
+            ))}
+
+            <button
+              disabled={page >= meta.totalPages}
+              onClick={() => push({ page: String(page + 1) })}
+              className="btn-ghost rounded-lg px-4 py-2 text-sm disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </main>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <p className="text-muted">Loading</p>
+        </div>
+      }
+    >
+      <JobsView />
+    </Suspense>
   );
 }

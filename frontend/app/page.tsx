@@ -114,7 +114,7 @@ export default function Home() {
                 {cities.map((city) => (
                   <Link
                     key={city.name}
-                    href="/jobs"
+                    href={`/jobs?location=${city.name}`}
                     className="surface surface-hover rounded-lg px-4 py-3"
                   >
                     <div className="flex items-baseline justify-between">

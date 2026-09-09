@@ -9,6 +9,8 @@ import { Job } from "./entities/job.entity";
 import { CreateJobDto } from "./dto/create-job.dto";
 import { UpdateJobDto } from "./dto/update-job.dto";
 import { CompaniesService } from "../companies/companies.service";
+import { FilterJobsDto } from "./dto/filter-jobs.dto";
+import { PaginatedResult } from "../../common/dto/pagination.dto";
 
 @Injectable()
 export class JobsService {
@@ -31,12 +33,57 @@ export class JobsService {
     return this.jobsRepository.save(job);
   }
 
-  async findAllActive(): Promise<Job[]> {
-    return this.jobsRepository.find({
-      where: { isActive: true },
-      relations: { company: true },
-      order: { createdAt: "DESC" },
-    });
+  async findAllActive(filters: FilterJobsDto): Promise<PaginatedResult<Job>> {
+    const page = filters.page ?? 1;
+    const limit = filters.limit ?? 10;
+
+    const query = this.jobsRepository
+      .createQueryBuilder("job")
+      .leftJoinAndSelect("job.company", "company")
+      .where("job.isActive = :isActive", { isActive: true });
+
+    if (filters.search) {
+      query.andWhere(
+        "(job.title ILIKE :search OR job.description ILIKE :search)",
+        { search: `%${filters.search}%` },
+      );
+    }
+
+    if (filters.type) {
+      query.andWhere("job.type = :type", { type: filters.type });
+    }
+
+    if (filters.location) {
+      query.andWhere("job.location ILIKE :location", {
+        location: `%${filters.location}%`,
+      });
+    }
+
+    if (filters.salaryMin !== undefined) {
+      query.andWhere("job.salaryMax >= :salaryMin", {
+        salaryMin: filters.salaryMin,
+      });
+    }
+
+    if (filters.salaryMax !== undefined) {
+      query.andWhere("job.salaryMin <= :salaryMax", {
+        salaryMax: filters.salaryMax,
+      });
+    }
+
+    if (filters.sortBy === "oldest") {
+      query.orderBy("job.createdAt", "ASC");
+    } else if (filters.sortBy === "salary") {
+      query.orderBy("job.salaryMax", "DESC", "NULLS LAST");
+    } else {
+      query.orderBy("job.createdAt", "DESC");
+    }
+
+    query.skip((page - 1) * limit).take(limit);
+
+    const [data, total] = await query.getManyAndCount();
+
+    return new PaginatedResult(data, total, page, limit);
   }
 
   async findByCompanyUserId(userId: string): Promise<Job[]> {

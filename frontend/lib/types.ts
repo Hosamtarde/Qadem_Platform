@@ -67,3 +67,26 @@ export const JOB_TYPE_LABELS: Record<JobType, string> = {
   PART_TIME: "Part-time",
   INTERNSHIP: "Internship",
 };
+
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface Paginated<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+export interface JobFilters {
+  search?: string;
+  type?: JobType;
+  location?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  sortBy?: "newest" | "oldest" | "salary";
+  page?: number;
+  limit?: number;
+}
