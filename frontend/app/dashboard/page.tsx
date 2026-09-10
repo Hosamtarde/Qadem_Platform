@@ -10,9 +10,8 @@ import Logo from "@/components/logo";
 const candidateNav = [
   { label: "Overview", href: "/dashboard", ready: true },
   { label: "Browse jobs", href: "/jobs", ready: true },
-  { label: "My applications", href: "#", ready: false },
-  { label: "Profile", href: "#", ready: false },
-];
+  { label: "My applications", href: "/dashboard/applications", ready: true },
+  { label: "Profile", href: "/dashboard/profile", ready: true },];
 
 const companyNav = [
   { label: "Overview", href: "/dashboard", ready: true },

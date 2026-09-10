@@ -13,12 +13,14 @@ import { LoginDto } from './dto/login.dto';
 import { User } from '../users/entities/user.entity';
 import { CompaniesService } from '../companies/companies.service';
 import { UserRole } from '../../common/enums';
+import { CandidatesService } from '../candidates/candidates.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly companiesService: CompaniesService,
+    private readonly candidatesService: CandidatesService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -40,6 +42,9 @@ export class AuthService {
 
     if (user.role === UserRole.COMPANY) {
       await this.companiesService.createForUser(user.id, user.fullName);
+    } 
+    else {
+      await this.candidatesService.createForUser(user.id);
     }
 
     return this.issueTokens(user);

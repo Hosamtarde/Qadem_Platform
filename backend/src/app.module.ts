@@ -6,6 +6,8 @@ import { validationSchema } from './config/validation.schema';
 import { AuthModule } from './modules/auth/auth.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { JobsModule } from './modules/jobs/jobs.module';
+import { ApplicationsModule } from './modules/applications/applications.module';
+import { CandidatesModule } from './modules/candidates/candidates.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { JobsModule } from './modules/jobs/jobs.module';
     AuthModule,
     CompaniesModule,
     JobsModule,
+    ApplicationsModule,
+    CandidatesModule,
   ],
 })
 export class AppModule {}

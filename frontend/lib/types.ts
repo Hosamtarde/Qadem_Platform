@@ -90,3 +90,89 @@ export interface JobFilters {
   page?: number;
   limit?: number;
 }
+
+export interface ApplicationJobSummary {
+  id: string;
+  title: string;
+  type: JobType;
+  location: string;
+  companyName: string | null;
+}
+
+export interface ApplicationCandidateSummary {
+  id: string;
+  fullName: string;
+  email: string;
+  profileId: string | null;
+  headline: string | null;
+  location: string | null;
+  skills: string[];
+  yearsOfExperience: number | null;
+  phone: string | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  portfolioUrl: string | null;
+  resumeUrl: string | null;
+  hasResumeFile: boolean;
+}
+
+export interface Application {
+  id: string;
+  coverLetter: string | null;
+  status: ApplicationStatus;
+  companyNote: string | null;
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  job?: ApplicationJobSummary;
+  candidate?: ApplicationCandidateSummary;
+}
+
+export type StatusCounts = Record<ApplicationStatus, number>;
+
+export const STATUS_LABELS: Record<ApplicationStatus, string> = {
+  SUBMITTED: "Submitted",
+  REVIEWING: "Reviewing",
+  ACCEPTED: "Accepted",
+  REJECTED: "Rejected",
+};
+
+export const STATUS_BADGES: Record<ApplicationStatus, string> = {
+  SUBMITTED: "badge-neutral",
+  REVIEWING: "badge-warn",
+  ACCEPTED: "badge-success",
+  REJECTED: "badge-danger",
+};
+
+export interface CandidateProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  headline: string | null;
+  bio: string | null;
+  phone: string | null;
+  location: string | null;
+  skills: string[];
+  yearsOfExperience: number | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  portfolioUrl: string | null;
+  resumeUrl: string | null;
+  resumeOriginalName: string | null;
+  hasResumeFile: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateCandidateProfileInput {
+  headline?: string;
+  bio?: string;
+  phone?: string;
+  location?: string;
+  skills?: string[];
+  yearsOfExperience?: number;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  portfolioUrl?: string;
+  resumeUrl?: string;
+}

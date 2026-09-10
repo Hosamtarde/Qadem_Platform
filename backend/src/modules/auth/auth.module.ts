@@ -9,9 +9,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { JwtAuthGuard, RolesGuard,  } from '../../common/guards';
 import { CompaniesModule } from '../companies/companies.module';
+import { CandidatesModule } from '../candidates/candidates.module';
 
 @Module({
-  imports: [UsersModule, PassportModule,CompaniesModule, JwtModule.register({})],
+  imports: [UsersModule, PassportModule,CompaniesModule,CandidatesModule, JwtModule.register({})],
   controllers: [AuthController],
   providers: [
     AuthService,

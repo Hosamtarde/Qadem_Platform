@@ -244,10 +244,38 @@ export const seedCompanies: SeedCompany[] = [
 ];
 
 export const seedCandidates = [
-  { email: "ahmad@example.com", fullName: "Ahmad Nasser" },
-  { email: "layan@example.com", fullName: "Layan Odeh" },
-  { email: "omar@example.com", fullName: "Omar Haddad" },
-  { email: "sara@example.com", fullName: "Sara Khalil" },
+  {
+    email: "ahmad@example.com",
+    fullName: "Ahmad Nasser",
+    headline: "Backend Developer",
+    location: "Nablus",
+    skills: ["NestJS", "TypeScript", "PostgreSQL", "Docker"],
+    yearsOfExperience: 2,
+  },
+  {
+    email: "layan@example.com",
+    fullName: "Layan Odeh",
+    headline: "UI/UX Designer",
+    location: "Ramallah",
+    skills: ["Figma", "Design Systems", "Prototyping"],
+    yearsOfExperience: 3,
+  },
+  {
+    email: "omar@example.com",
+    fullName: "Omar Haddad",
+    headline: "Computer Science Student",
+    location: "Hebron",
+    skills: ["JavaScript", "React", "Git"],
+    yearsOfExperience: 0,
+  },
+  {
+    email: "sara@example.com",
+    fullName: "Sara Khalil",
+    headline: "QA Engineer",
+    location: "Ramallah",
+    skills: ["Test Automation", "Cypress", "Manual Testing"],
+    yearsOfExperience: 4,
+  },
 ];
 
 export const seedRole = UserRole;
