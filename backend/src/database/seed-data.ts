@@ -245,36 +245,114 @@ export const seedCompanies: SeedCompany[] = [
 
 export const seedCandidates = [
   {
-    email: "ahmad@example.com",
-    fullName: "Ahmad Nasser",
+    email: "hosam@example.com",
+    fullName: "Hosam Taradeh",
     headline: "Backend Developer",
-    location: "Nablus",
-    skills: ["NestJS", "TypeScript", "PostgreSQL", "Docker"],
-    yearsOfExperience: 2,
-  },
-  {
-    email: "layan@example.com",
-    fullName: "Layan Odeh",
-    headline: "UI/UX Designer",
-    location: "Ramallah",
-    skills: ["Figma", "Design Systems", "Prototyping"],
-    yearsOfExperience: 3,
-  },
-  {
-    email: "omar@example.com",
-    fullName: "Omar Haddad",
-    headline: "Computer Science Student",
     location: "Hebron",
-    skills: ["JavaScript", "React", "Git"],
-    yearsOfExperience: 0,
+    skills: ["NestJS", "TypeScript", "PostgreSQL", "Docker", "TypeORM"],
+    yearsOfExperience: 2,
+    bio: "I build REST APIs with NestJS and PostgreSQL, and care about how a system is structured before it is written.",
+    resumeUrl: "https://example.com/hosam-cv",
   },
   {
-    email: "sara@example.com",
-    fullName: "Sara Khalil",
-    headline: "QA Engineer",
+    email: "mohammed@example.com",
+    fullName: "Mohammed Tarade",
+    headline: "Full Stack Developer",
+    location: "Hebron",
+    skills: ["React", "Next.js", "NestJS", "Tailwind CSS"],
+    yearsOfExperience: 2,
+    bio: "Comfortable across the stack, with a preference for clean interfaces backed by well designed APIs.",
+    resumeUrl: "https://example.com/mohammed-cv",
+  },
+  {
+    email: "malik@example.com",
+    fullName: "Malik Tayyem",
+    headline: "Mobile Developer",
     location: "Ramallah",
-    skills: ["Test Automation", "Cypress", "Manual Testing"],
-    yearsOfExperience: 4,
+    skills: ["Flutter", "Dart", "Firebase", "REST APIs"],
+    yearsOfExperience: 3,
+    bio: "Cross platform mobile developer shipping production apps for local businesses.",
+    resumeUrl: "https://example.com/malik-cv",
+  },
+  {
+    email: "sami@example.com",
+    fullName: "Sami Ghaith",
+    headline: "Computer Science Student",
+    location: "Nablus",
+    skills: ["JavaScript", "Python", "Git", "SQL"],
+    yearsOfExperience: 0,
+    bio: "Final year student looking for a first internship where I can learn from a real codebase.",
+  },
+];
+
+export interface SeedApplication {
+  candidateEmail: string;
+  companyEmail: string;
+  jobTitle: string;
+  status: "SUBMITTED" | "REVIEWING" | "ACCEPTED" | "REJECTED";
+  coverLetter?: string;
+  companyNote?: string;
+}
+
+export const seedApplications: SeedApplication[] = [
+  {
+    candidateEmail: "hosam@example.com",
+    companyEmail: "harri@example.com",
+    jobTitle: "Senior Frontend Engineer",
+    status: "REVIEWING",
+    coverLetter:
+      "I have spent the last two years building APIs, and I want to move closer to the product side without leaving engineering.",
+    companyNote: "Strong backend background. Worth a technical screen.",
+  },
+  {
+    candidateEmail: "hosam@example.com",
+    companyEmail: "foothill@example.com",
+    jobTitle: "Backend Engineer",
+    status: "ACCEPTED",
+    coverLetter:
+      "NestJS and PostgreSQL are what I use daily, and I have taken a project from schema design through to deployment.",
+    companyNote: "Offer sent. Start date to be confirmed.",
+  },
+  {
+    candidateEmail: "mohammed@example.com",
+    companyEmail: "harri@example.com",
+    jobTitle: "Senior Frontend Engineer",
+    status: "SUBMITTED",
+    coverLetter:
+      "I work across React and NestJS, so I understand both sides of the contract between them.",
+  },
+  {
+    candidateEmail: "mohammed@example.com",
+    companyEmail: "wahj@example.com",
+    jobTitle: "UI/UX Designer",
+    status: "REJECTED",
+    coverLetter:
+      "I design the interfaces I build, and I would like to focus more on the design side.",
+    companyNote: "We are looking for a dedicated designer rather than a hybrid role.",
+  },
+  {
+    candidateEmail: "malik@example.com",
+    companyEmail: "aeliasoft@example.com",
+    jobTitle: "Mobile Developer",
+    status: "REVIEWING",
+    coverLetter:
+      "Three years with Flutter, including two apps currently live on both stores.",
+  },
+  {
+    candidateEmail: "sami@example.com",
+    companyEmail: "asal@example.com",
+    jobTitle: "R&D Engineering Intern",
+    status: "SUBMITTED",
+    coverLetter:
+      "Final year computer science student. I want an internship where I read real code, not tutorials.",
+  },
+  {
+    candidateEmail: "sami@example.com",
+    companyEmail: "wahj@example.com",
+    jobTitle: "Frontend Development Intern",
+    status: "SUBMITTED",
+    coverLetter:
+      "I have built a few small React projects and I am ready to work on something with real users.",
   },
 ];
 
