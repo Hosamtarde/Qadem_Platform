@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   createContext,
@@ -44,6 +44,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .catch(() => tokenStorage.clear())
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key !== "accessToken") return;
+
+      if (!e.newValue) {
+        setUser(null);
+        router.push("/login");
+        return;
+      }
+
+      authApi
+        .getMe()
+        .then(setUser)
+        .catch(() => {
+          setUser(null);
+          router.push("/login");
+        });
+    }
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [router]);
 
   const login = useCallback(
     async (email: string, password: string) => {
