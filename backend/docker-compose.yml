@@ -1,7 +1,8 @@
-﻿services:
+
+services:
   postgres:
     image: postgres:16-alpine
-    container_name: job_platform_db
+    container_name: qadem_db
     restart: unless-stopped
     ports:
       - "5434:5432"
@@ -12,16 +13,29 @@
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  postgres_test:
+    image: postgres:16-alpine
+    container_name: qadem_db_test
+    restart: unless-stopped
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: qadem_test
+    tmpfs:
+      - /var/lib/postgresql/data
+
   pgadmin:
     image: dpage/pgadmin4
-    container_name: job_platform_pgadmin
+    container_name: qadem_pgadmin
     restart: unless-stopped
     depends_on:
       - postgres
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@job.com
+      PGADMIN_DEFAULT_EMAIL: admin@qadem.com
       PGADMIN_DEFAULT_PASSWORD: admin123
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:

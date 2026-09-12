@@ -8,7 +8,6 @@ import { getMyCompany, updateMyCompany } from "@/lib/companies";
 import { listMyJobs } from "@/lib/jobs";
 import { ApiRequestError } from "@/lib/api";
 import { Company, Job, JOB_TYPE_LABELS } from "@/lib/types";
-import Logo from "@/components/logo";
 
 export default function CompanyProfilePage() {
   const { user, loading: authLoading } = useAuth();
@@ -93,11 +92,7 @@ export default function CompanyProfilePage() {
   }
 
   const initials = company
-    ? company.name
-        .split(" ")
-        .map((w) => w[0])
-        .slice(0, 2)
-        .join("")
+    ? company.name.split(" ").map((w) => w[0]).slice(0, 2).join("")
     : "";
 
   const liveJobs = jobs.filter((j) => j.isActive);
@@ -106,40 +101,30 @@ export default function CompanyProfilePage() {
     : "";
 
   return (
-    <div className="relative min-h-screen">
-      <header className="relative z-20 border-b border-line-soft">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard">
-            <Logo />
-          </Link>
-          <Link href="/dashboard" className="btn-ghost rounded-lg px-4 py-2 text-sm">
-            Back
-          </Link>
+    <>
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-5 lg:px-10">
+        <div>
+          <p className="text-sm text-muted">Company workspace</p>
+          <h1 className="mt-1 font-display text-2xl font-bold text-text">
+            Company profile
+          </h1>
         </div>
+        {!editing && (
+          <button
+            onClick={startEditing}
+            className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
+          >
+            Edit profile
+          </button>
+        )}
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 py-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-text">
-              Company profile
-            </h1>
-            <p className="mt-2 text-sm text-muted">
-              {editing
-                ? "Changes are visible to candidates as soon as you save."
-                : "This is what candidates see next to your openings."}
-            </p>
-          </div>
-
-          {!editing && (
-            <button
-              onClick={startEditing}
-              className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
-            >
-              Edit profile
-            </button>
-          )}
-        </div>
+      <main className="px-6 py-8 lg:px-10">
+        <p className="text-sm text-muted">
+          {editing
+            ? "Changes are visible to candidates as soon as you save."
+            : "This is what candidates see next to your openings."}
+        </p>
 
         {saved && !editing && (
           <p className="mt-6 rounded-lg border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">
@@ -155,7 +140,7 @@ export default function CompanyProfilePage() {
 
         {!editing && company && (
           <>
-            <section className="surface mt-8 rounded-xl p-8">
+            <section className="surface mt-6 rounded-xl p-8">
               <div className="flex flex-wrap items-start gap-5">
                 <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-line bg-panel-2 font-display text-lg font-bold text-brand-soft">
                   {initials}
@@ -166,7 +151,7 @@ export default function CompanyProfilePage() {
                   </h2>
                   <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted">
                     {company.location ? <span>{company.location}</span> : null}
-                                        {company.website ? (
+                    {company.website ? (
                       <a href={company.website} target="_blank" rel="noreferrer" className="text-brand underline underline-offset-4 transition hover:text-brand-soft">{cleanUrl}</a>
                     ) : null}
                   </div>
@@ -254,7 +239,7 @@ export default function CompanyProfilePage() {
         )}
 
         {editing && (
-          <form onSubmit={handleSubmit} className="surface mt-8 rounded-xl p-8">
+          <form onSubmit={handleSubmit} className="surface mt-6 rounded-xl p-8">
             <div className="space-y-6">
               <div>
                 <label className="text-sm text-muted">Company name</label>
@@ -329,6 +314,6 @@ export default function CompanyProfilePage() {
           </form>
         )}
       </main>
-    </div>
+    </>
   );
 }

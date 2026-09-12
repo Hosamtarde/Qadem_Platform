@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { createJob, deleteJob, listMyJobs, updateJob } from "@/lib/jobs";
 import { ApiRequestError } from "@/lib/api";
 import { Job, JobType, JOB_TYPE_LABELS } from "@/lib/types";
-import Logo from "@/components/logo";
 
 const TYPES: JobType[] = ["FULL_TIME", "PART_TIME", "INTERNSHIP"];
 
@@ -149,39 +147,30 @@ export default function ManageJobsPage() {
   const liveCount = jobs.filter((j) => j.isActive).length;
 
   return (
-    <div className="relative min-h-screen">
-      <header className="relative z-20 border-b border-line-soft">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard">
-            <Logo />
-          </Link>
-          <Link href="/dashboard" className="btn-ghost rounded-lg px-4 py-2 text-sm">
-            Back
-          </Link>
+    <>
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-5 lg:px-10">
+        <div>
+          <p className="text-sm text-muted">Company workspace</p>
+          <h1 className="mt-1 font-display text-2xl font-bold text-text">
+            My postings
+          </h1>
         </div>
+        <button
+          onClick={formOpen ? closeForm : openCreate}
+          className={
+            formOpen
+              ? "btn-ghost rounded-lg px-6 py-2.5 text-sm font-semibold"
+              : "btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
+          }
+        >
+          {formOpen ? "Cancel" : "Publish a role"}
+        </button>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-text">
-              My postings
-            </h1>
-            <p className="mt-2 text-sm text-muted">
-              {jobs.length} total, {liveCount} live
-            </p>
-          </div>
-          <button
-            onClick={formOpen ? closeForm : openCreate}
-            className={
-              formOpen
-                ? "btn-ghost rounded-lg px-6 py-2.5 text-sm font-semibold"
-                : "btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
-            }
-          >
-            {formOpen ? "Cancel" : "Publish a role"}
-          </button>
-        </div>
+      <main className="px-6 py-8 lg:px-10">
+        <p className="text-sm text-muted">
+          {jobs.length} total, {liveCount} live
+        </p>
 
         {error && (
           <p className="mt-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
@@ -190,7 +179,7 @@ export default function ManageJobsPage() {
         )}
 
         {formOpen && (
-          <form onSubmit={handleSubmit} className="surface mt-7 rounded-xl p-7">
+          <form onSubmit={handleSubmit} className="surface mt-6 rounded-xl p-7">
             <h2 className="text-sm font-semibold text-brand">
               {editingId ? "Edit role" : "New role"}
             </h2>
@@ -309,7 +298,7 @@ export default function ManageJobsPage() {
         )}
 
         {jobs.length === 0 && !formOpen && (
-          <div className="surface mt-8 rounded-xl px-8 py-16 text-center">
+          <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
             <p className="font-semibold text-text">No roles published yet</p>
             <p className="mt-2 text-sm text-muted">
               Publish your first opening and it will appear on the public board.
@@ -318,7 +307,7 @@ export default function ManageJobsPage() {
         )}
 
         {jobs.length > 0 && (
-          <div className="mt-8 overflow-hidden rounded-xl border border-line">
+          <div className="mt-6 overflow-hidden rounded-xl border border-line">
             <div className="hidden border-b border-line bg-panel-2 px-5 py-3 text-xs font-medium text-muted sm:grid sm:grid-cols-[1fr_130px_110px_120px_180px]">
               <span>Role</span>
               <span>Type</span>
@@ -386,6 +375,6 @@ export default function ManageJobsPage() {
           </div>
         )}
       </main>
-    </div>
+    </>
   );
 }

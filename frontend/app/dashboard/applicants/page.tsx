@@ -16,7 +16,6 @@ import {
   STATUS_BADGES,
   STATUS_LABELS,
 } from "@/lib/types";
-import Logo from "@/components/logo";
 
 const NEXT_STATES: Record<ApplicationStatus, ApplicationStatus[]> = {
   SUBMITTED: ["REVIEWING", "ACCEPTED", "REJECTED"],
@@ -144,26 +143,21 @@ export default function ApplicantsPage() {
   const selectedJob = jobs.find((j) => j.id === selectedJobId) ?? null;
 
   return (
-    <div className="relative min-h-screen">
-      <header className="relative z-20 border-b border-line-soft">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard">
-            <Logo />
-          </Link>
-          <Link href="/dashboard" className="btn-ghost rounded-lg px-4 py-2 text-sm">
-            Back
-          </Link>
-        </div>
+    <>
+      <header className="border-b border-line px-6 py-5 lg:px-10">
+        <p className="text-sm text-muted">Company workspace</p>
+        <h1 className="mt-1 font-display text-2xl font-bold text-text">
+          Applicants
+        </h1>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
-        <h1 className="font-display text-3xl font-bold text-text">Applicants</h1>
-        <p className="mt-2 text-sm text-muted">
+      <main className="px-6 py-8 lg:px-10">
+        <p className="text-sm text-muted">
           Review who applied and move them through your pipeline.
         </p>
 
         {jobs.length === 0 && (
-          <div className="surface mt-8 rounded-xl px-8 py-16 text-center">
+          <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
             <p className="font-semibold text-text">No postings yet</p>
             <p className="mt-2 text-sm text-muted">
               Publish a role and applicants will show up here.
@@ -179,7 +173,7 @@ export default function ApplicantsPage() {
 
         {jobs.length > 0 && (
           <>
-            <div className="mt-8">
+            <div className="mt-6">
               <label className="text-sm text-muted">Posting</label>
               <select
                 value={selectedJobId ?? ""}
@@ -462,6 +456,6 @@ export default function ApplicantsPage() {
           </>
         )}
       </main>
-    </div>
+    </>
   );
 }

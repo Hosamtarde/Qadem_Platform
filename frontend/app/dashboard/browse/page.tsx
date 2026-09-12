@@ -4,10 +4,20 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { listJobs } from "@/lib/jobs";
-import { Job, JobType, JobFilters, PaginationMeta, JOB_TYPE_LABELS } from "@/lib/types";
-import Logo from "@/components/logo";
+import {
+  Job,
+  JobType,
+  JobFilters,
+  PaginationMeta,
+  JOB_TYPE_LABELS,
+} from "@/lib/types";
 
-const TYPES: (JobType | "ALL")[] = ["ALL", "FULL_TIME", "PART_TIME", "INTERNSHIP"];
+const TYPES: (JobType | "ALL")[] = [
+  "ALL",
+  "FULL_TIME",
+  "PART_TIME",
+  "INTERNSHIP",
+];
 const CITIES = ["Ramallah", "Nablus", "Hebron", "Rawabi"];
 const SORTS: { key: "newest" | "oldest" | "salary"; label: string }[] = [
   { key: "newest", label: "Newest" },
@@ -19,7 +29,7 @@ function initials(name: string) {
   return name.split(" ").map((w) => w[0]).slice(0, 2).join("");
 }
 
-function JobsView() {
+function BrowseView() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -48,7 +58,7 @@ function JobsView() {
       });
       if (!("page" in next)) sp.delete("page");
       const qs = sp.toString();
-      router.push(qs ? `/jobs?${qs}` : "/jobs");
+      router.push(qs ? `/dashboard/browse?${qs}` : "/dashboard/browse");
     },
     [params, router],
   );
@@ -72,27 +82,19 @@ function JobsView() {
       .finally(() => setLoading(false));
   }, [search, type, location, sortBy, page]);
 
-  const activeCount =
-    (search ? 1 : 0) + (type ? 1 : 0) + (location ? 1 : 0);
+  const activeCount = (search ? 1 : 0) + (type ? 1 : 0) + (location ? 1 : 0);
 
   return (
-    <div className="relative min-h-screen">
-      <header className="relative z-20 border-b border-line-soft">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/">
-            <Logo />
-          </Link>
-          <Link href="/dashboard" className="btn-ghost rounded-lg px-4 py-2 text-sm">
-            Dashboard
-          </Link>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-6 py-10">
-        <h1 className="font-display text-3xl font-bold text-text">
+    <>
+      <header className="border-b border-line px-6 py-5 lg:px-10">
+        <p className="text-sm text-muted">Browse</p>
+        <h1 className="mt-1 font-display text-2xl font-bold text-text">
           Open positions
         </h1>
-        <p className="mt-2 text-sm text-muted">
+      </header>
+
+      <main className="px-6 py-8 lg:px-10">
+        <p className="text-sm text-muted">
           {loading
             ? "Searching"
             : meta
@@ -105,7 +107,7 @@ function JobsView() {
             e.preventDefault();
             push({ search: searchInput });
           }}
-          className="mt-7 flex gap-2"
+          className="mt-6 flex gap-2"
         >
           <input
             type="search"
@@ -172,7 +174,7 @@ function JobsView() {
 
           {activeCount > 0 && (
             <button
-              onClick={() => router.push("/jobs")}
+              onClick={() => router.push("/dashboard/browse")}
               className="px-3 py-2 text-xs text-muted underline underline-offset-4 transition hover:text-text"
             >
               Clear filters
@@ -181,13 +183,13 @@ function JobsView() {
         </div>
 
         {error && (
-          <p className="mt-8 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+          <p className="mt-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
             {error}
           </p>
         )}
 
         {!loading && !error && jobs.length === 0 && (
-          <div className="surface mt-8 rounded-xl px-8 py-20 text-center">
+          <div className="surface mt-6 rounded-xl px-8 py-20 text-center">
             <p className="font-semibold text-text">No matches</p>
             <p className="mt-2 text-sm text-muted">
               Try a different search term or clear some filters.
@@ -195,7 +197,7 @@ function JobsView() {
           </div>
         )}
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {jobs.map((job) => {
             const isIntern = job.type === "INTERNSHIP";
             const org = job.company?.name ?? "Company";
@@ -258,19 +260,21 @@ function JobsView() {
               Previous
             </button>
 
-            {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map((n) => (
-              <button
-                key={n}
-                onClick={() => push({ page: String(n) })}
-                className={
-                  n === page
-                    ? "btn-primary h-9 w-9 rounded-lg text-sm font-semibold"
-                    : "btn-ghost h-9 w-9 rounded-lg text-sm"
-                }
-              >
-                {n}
-              </button>
-            ))}
+            {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(
+              (n) => (
+                <button
+                  key={n}
+                  onClick={() => push({ page: String(n) })}
+                  className={
+                    n === page
+                      ? "btn-primary h-9 w-9 rounded-lg text-sm font-semibold"
+                      : "btn-ghost h-9 w-9 rounded-lg text-sm"
+                  }
+                >
+                  {n}
+                </button>
+              ),
+            )}
 
             <button
               disabled={page >= meta.totalPages}
@@ -282,11 +286,11 @@ function JobsView() {
           </div>
         )}
       </main>
-    </div>
+    </>
   );
 }
 
-export default function JobsPage() {
+export default function BrowsePage() {
   return (
     <Suspense
       fallback={
@@ -295,7 +299,7 @@ export default function JobsPage() {
         </div>
       }
     >
-      <JobsView />
+      <BrowseView />
     </Suspense>
   );
 }

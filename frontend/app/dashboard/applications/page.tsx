@@ -12,7 +12,6 @@ import {
   STATUS_BADGES,
   STATUS_LABELS,
 } from "@/lib/types";
-import Logo from "@/components/logo";
 
 const FILTERS: (ApplicationStatus | "ALL")[] = [
   "ALL",
@@ -84,56 +83,49 @@ export default function MyApplicationsPage() {
   }
 
   return (
-    <div className="relative min-h-screen">
-      <header className="relative z-20 border-b border-line-soft">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <Link href="/dashboard">
-            <Logo />
-          </Link>
-          <Link href="/dashboard" className="btn-ghost rounded-lg px-4 py-2 text-sm">
-            Back
-          </Link>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-4xl px-6 py-10">
-        <h1 className="font-display text-3xl font-bold text-text">
+    <>
+      <header className="border-b border-line px-6 py-5 lg:px-10">
+        <p className="text-sm text-muted">Candidate workspace</p>
+        <h1 className="mt-1 font-display text-2xl font-bold text-text">
           My applications
         </h1>
-        <p className="mt-2 text-sm text-muted">
+      </header>
+
+      <main className="px-6 py-8 lg:px-10">
+        <p className="text-sm text-muted">
           {applications.length}{" "}
           {applications.length === 1 ? "application" : "applications"} sent
         </p>
 
-        <div className="mt-8 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
-          {(["SUBMITTED", "REVIEWING", "ACCEPTED", "REJECTED"] as ApplicationStatus[]).map(
-            (s) => (
-              <div key={s} className="bg-panel p-5">
-                <span className={`badge ${STATUS_BADGES[s]}`}>
-                  {STATUS_LABELS[s]}
-                </span>
-                <p className="mt-3 font-display text-2xl font-bold text-text">
-                  {counts[s]}
-                </p>
-              </div>
-            ),
-          )}
+        <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
+          {(
+            ["SUBMITTED", "REVIEWING", "ACCEPTED", "REJECTED"] as ApplicationStatus[]
+          ).map((s) => (
+            <div key={s} className="bg-panel p-5">
+              <span className={`badge ${STATUS_BADGES[s]}`}>
+                {STATUS_LABELS[s]}
+              </span>
+              <p className="mt-3 font-display text-2xl font-bold text-text">
+                {counts[s]}
+              </p>
+            </div>
+          ))}
         </div>
 
         {error && (
-          <p className="mt-8 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+          <p className="mt-6 rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
             {error}
           </p>
         )}
 
         {applications.length === 0 && !error && (
-          <div className="surface mt-8 rounded-xl px-8 py-16 text-center">
+          <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
             <p className="font-semibold text-text">Nothing sent yet</p>
             <p className="mt-2 text-sm text-muted">
               Browse the board and apply to your first opening.
             </p>
             <Link
-              href="/jobs"
+              href="/dashboard/browse"
               className="btn-primary mt-7 inline-block rounded-lg px-6 py-2.5 text-sm font-semibold"
             >
               Browse openings
@@ -143,7 +135,7 @@ export default function MyApplicationsPage() {
 
         {applications.length > 0 && (
           <>
-            <div className="mt-8 inline-flex flex-wrap gap-1 rounded-lg border border-line bg-panel p-1">
+            <div className="mt-6 inline-flex flex-wrap gap-1 rounded-lg border border-line bg-panel p-1">
               {FILTERS.map((f) => (
                 <button
                   key={f}
@@ -222,6 +214,6 @@ export default function MyApplicationsPage() {
           </>
         )}
       </main>
-    </div>
+    </>
   );
 }

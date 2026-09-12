@@ -2,6 +2,7 @@ import Link from "next/link";
 import Particles from "@/components/particles";
 import Logo from "@/components/logo";
 import CompanyStrip from "@/components/company-strip";
+import BuiltAtWahj from "@/components/built-at-wahj";
 
 const cities = [
   { name: "Ramallah", roles: 5 },
@@ -207,6 +208,7 @@ export default function Home() {
         </section>
       </main>
 
+      <BuiltAtWahj />      
       <footer className="border-t border-line-soft py-8">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6">
           <Logo />

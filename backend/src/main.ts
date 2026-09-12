@@ -24,7 +24,7 @@ async function bootstrap() {
   const port = config.get<number>('port') ?? 3000;
 
     const swaggerConfig = new DocumentBuilder()
-    .setTitle('Job & Internship Platform API')
+    .setTitle('Qadem Platform API')
     .setDescription(
       'REST API for companies to post jobs and candidates to apply',
     )
