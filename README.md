@@ -1,177 +1,176 @@
-<div align="center">
+# Qadem Platform
 
-<img src="docs/logo.svg" alt="Qadem" width="220" />
+REST API for companies to post jobs/internships and candidates to browse, build a profile, and apply.
 
-**A jobs and internships platform built for the Palestinian tech market.**
+## Tech Stack
 
-Companies publish openings. Candidates apply and follow every application from sent to decided — in one place.
-
-[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?style=flat-square&logo=nestjs&logoColor=white)](https://nestjs.com)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org)
-[![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com)
-
-</div>
-
----
-
-## About
-
-Qadem was built during a backend engineering internship at **Wahj**, a Palestinian software company based in Hebron. The brief was to design and build a production-grade REST API with NestJS, TypeScript and PostgreSQL. We took it further and shipped a full product — API, database and web client.
-
-The name comes from **قدّم** (to apply) and **قادم** (what comes next). It carries both sides of what the platform does.
-
----
-
-## The problem
-
-A graduate applies to forty openings and hears back from three. They never learn why. Was the application read? Was it ever opened? Did the role close?
-
-Qadem makes the state of every application explicit. Nobody is left guessing.
-
----
+- **Backend:** NestJS, TypeScript, PostgreSQL, TypeORM
+- **Auth:** JWT (access + refresh tokens)
+- **Docs:** Swagger (OpenAPI)
+- **Testing:** Jest (e2e)
+- **CI/CD:** GitHub Actions
 
 ## Features
 
-### For candidates
+### Auth
+- Register / Login (Candidate or Company)
+- JWT access + refresh tokens
+- Protected routes via guards
 
-| Feature | Description |
-|---|---|
-| Browse without an account | The full board is public. Sign up only when you are ready to apply. |
-| Search and filter | By title, city, employment type and salary range. |
-| Apply once per role | The platform enforces one application per opening at the database level. |
-| Track every application | Four explicit states, visible from the moment you hit send. |
+### Companies
+- Company profile (create/update)
+- Public company view by ID
 
-### For companies
+### Candidates
+- Candidate profile (create/update)
+- Resume upload (PDF) and download
+- Remove resume
 
-| Feature | Description |
-|---|---|
-| Public company profile | Name, description, location and website — shown next to every role. |
-| Publish and manage roles | Full-time, part-time or internship. Edit any detail at any time. |
-| Pause instead of delete | Take a role off the board without losing its applications. |
-| Review applicants | See everyone who applied and move them through your pipeline. |
-| Strict ownership | A company can only ever touch its own postings. |
+### Jobs
+- Companies: create, update, delete, list own jobs
+- Public: search & filter jobs (type, location, salary range, sort, pagination)
 
----
-
-## The application lifecycle
-
-Every application carries one of four states. Colour and label work together, so the state reads at a glance and stays readable for colour-blind users.
-
-```
-   SUBMITTED  ──▶  REVIEWING  ──▶  ACCEPTED
-                        │
-                        └────────▶  REJECTED
-```
-
-| State | Meaning |
-|---|---|
-| **Submitted** | Reaches the company the moment it is sent. |
-| **Reviewing** | Opened, and being read. |
-| **Accepted** | Moved forward. The company will reach out. |
-| **Rejected** | Not this time — but no longer a question mark. |
+### Applications
+- Candidates: apply to a job, check if already applied, view their applications, view stats
+- Companies: view applicants per job, update application status, view stats
+- Duplicate-apply protection
 
 ---
 
-## Data model
+## Getting Started
 
-```mermaid
-erDiagram
-    USER ||--o| COMPANY : owns
-    COMPANY ||--o{ JOB : publishes
-    JOB ||--o{ APPLICATION : receives
-    USER ||--o{ APPLICATION : submits
+### Prerequisites
+- Node.js 24+
+- PostgreSQL 16+
+- npm
 
-    USER {
-        uuid id PK
-        string email UK
-        string password
-        string fullName
-        enum role
-    }
-    COMPANY {
-        uuid id PK
-        uuid userId FK
-        string name
-        text description
-        string website
-        string location
-    }
-    JOB {
-        uuid id PK
-        uuid companyId FK
-        string title
-        text description
-        enum type
-        string location
-        int salaryMin
-        int salaryMax
-        boolean isActive
-    }
-    APPLICATION {
-        uuid id PK
-        uuid jobId FK
-        uuid candidateId FK
-        text coverLetter
-        enum status
-    }
+### Installation
+
+```bash
+git clone <repo-url>
+cd Qadem_Platform/backend
+npm install
+```
+
+### Environment Variables
+
+Create a `.env` file in `backend/` based on `.env.example`:
+
+```env
+NODE_ENV=development
+PORT=3001
+
+DB_HOST=localhost
+DB_PORT=5434
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=job_platform
+
+JWT_ACCESS_SECRET=your_access_secret_change_this
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_SECRET=your_refresh_secret_change_this
+JWT_REFRESH_EXPIRES_IN=7d
+```
+
+### Database Setup
+
+```bash
+npm run migration:run
+```
+
+### Run the App
+
+```bash
+npm run start:dev
+```
+
+API runs at `http://localhost:3001/api`
+
+### API Documentation (Swagger)
+
+```
+http://localhost:3001/api/docs
 ```
 
 ---
 
-## Screenshots
+## Testing
 
-> Add your screenshots to `docs/screenshots/` and they will render here.
+The project includes end-to-end (e2e) tests covering critical business logic:
 
-| Landing | Job board |
-|---|---|
-| ![Landing page](docs/screenshots/landing.png) | ![Job board](docs/screenshots/jobs.png) |
+- Duplicate application prevention
+- Job ownership (companies can't edit/delete other companies' jobs)
+- Role-based access (candidates vs companies)
+- Application status transitions
 
-| Company dashboard | Application pipeline |
-|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Pipeline](docs/screenshots/pipeline.png) |
+### Run Tests Locally
 
----
+```bash
+npm run test:e2e
+```
 
-## Built with
+> Requires Node 24+ and a running PostgreSQL instance.
 
-**Backend** — NestJS, TypeScript, TypeORM, PostgreSQL, Passport JWT, bcrypt, class-validator, Swagger
+### Continuous Integration
 
-**Frontend** — Next.js (App Router), TypeScript, Tailwind CSS
+Tests run automatically on every `push` and `pull_request` to `main` via **GitHub Actions**. The workflow:
+1. Spins up a temporary PostgreSQL service container
+2. Installs dependencies
+3. Runs database migrations
+4. Runs the full e2e test suite
 
-**Infrastructure** — Docker Compose, pgAdmin
+Workflow file: `.github/workflows/backend-tests.yml`
 
----
-
-## Security
-
-Security was treated as a design constraint, not an afterthought.
-
-**Passwords and refresh tokens are both hashed** with bcrypt and excluded from queries by default — they are only ever loaded when explicitly requested.
-
-**Access and refresh tokens are signed with separate secrets**, so one can never be used in place of the other. Refresh tokens rotate on every use.
-
-**Endpoints are protected by default.** Public routes are the explicit exception, so a forgotten decorator fails closed rather than open.
-
-**Role and ownership are separate checks.** Being a company grants access to the company endpoints; owning a posting is verified independently before any edit or delete.
-
-**Responses are shaped by DTOs**, never by entities — internal fields cannot leak by accident when the schema changes.
+You can check test results under the **Actions** tab on GitHub.
 
 ---
 
-## API documentation
+## API Testing with Postman
 
-Interactive Swagger documentation is generated from the code and available at `/api/docs` when the server is running.
+A ready-to-use Postman collection is included for manual API testing.
+
+### Import Steps
+1. Open Postman
+2. Click **Import**
+3. Select `Qadem-API.postman_collection.json` (located in `backend/docs/` or project root)
+4. Create an Environment with:
+   - `baseUrl` = `http://localhost:3001`
+   - `accessToken` = *(leave empty, filled after login)*
+
+### Suggested Flow
+1. `POST /api/auth/register` → create an account
+2. `POST /api/auth/login` → get `accessToken`, save it to the environment variable
+3. Use protected endpoints (jobs, applications, profiles) with the saved token
 
 ---
 
-## Team
+## Project Structure
 
-Built by **Hosam Tarade** and **Mohammad Tarada** during a backend engineering internship at Wahj.
+```
+Qadem_Platform/
+├── backend/
+│   ├── src/
+│   │   ├── auth/
+│   │   ├── companies/
+│   │   ├── candidates/
+│   │   ├── jobs/
+│   │   ├── applications/
+│   │   └── ...
+│   ├── test/
+│   │   └── app.e2e-spec.ts
+│   ├── docs/
+│   │   └── Qadem-API.postman_collection.json
+│   └── .env.example
+├── .github/
+│   └── workflows/
+│       └── backend-tests.yml
+└── README.md
+```
 
 ---
 
-<div align="center">
-<sub>Built in Palestine.</sub>
-</div>
+## Notes
+
+- `synchronize: false` is enforced — schema changes go through migrations only.
+- Global `ValidationPipe`, `ClassSerializerInterceptor`, and role/ownership guards are applied across all modules.
+- Sensitive fields (passwords, tokens) are excluded from all API responses.
