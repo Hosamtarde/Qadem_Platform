@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import Particles from "@/components/particles";
 import Logo from "@/components/logo";
 import CompanyStrip from "@/components/company-strip";
@@ -208,7 +208,32 @@ export default function Home() {
         </section>
       </main>
 
-      <BuiltAtWahj />      
+      <BuiltAtWahj />
+
+      <div className="border-b border-line-soft py-10">
+        <div className="mx-auto max-w-lg px-6">
+          <div className="surface relative overflow-hidden rounded-xl border-brand/20 px-6 py-5 text-center">
+            <div className="absolute inset-0 bg-gradient-to-br from-brand/5 via-transparent to-brand-soft/5" />
+            <div className="relative z-10">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
+                Designed &amp; Built By
+              </p>
+              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+                <span className="font-display text-lg font-bold text-text">
+                  Hosam Tarade
+                </span>
+                <span className="text-sm font-light text-brand/50">
+                  &times;
+                </span>
+                <span className="font-display text-lg font-bold text-text">
+                  Mohammed Tarade
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <footer className="border-t border-line-soft py-8">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6">
           <Logo />
