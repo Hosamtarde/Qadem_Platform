@@ -27,6 +27,8 @@ import { CandidatesModule } from './modules/candidates/candidates.module';
         password: config.get<string>('database.password'),
         database: config.get<string>('database.name'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+        migrationsRun: true,
         synchronize: false,
         logging: config.get<string>('NODE_ENV') === 'development',
       }),
