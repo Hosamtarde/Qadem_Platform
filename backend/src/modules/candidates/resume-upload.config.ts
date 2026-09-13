@@ -1,6 +1,7 @@
 import { BadRequestException } from "@nestjs/common";
 import { diskStorage } from "multer";
 import { randomBytes } from "crypto";
+import { mkdirSync } from "fs";
 import { extname } from "path";
 import { RESUME_DIR } from "./candidates.service";
 
@@ -11,6 +12,8 @@ const ALLOWED_MIME = [
 ];
 
 const ALLOWED_EXT = [".pdf", ".doc", ".docx"];
+
+mkdirSync(RESUME_DIR, { recursive: true });
 
 export const resumeUploadOptions = {
   storage: diskStorage({
