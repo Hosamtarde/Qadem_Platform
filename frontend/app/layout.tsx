@@ -14,7 +14,7 @@ const sans = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Job Platform",
+  title: "Qadem",
   description:
     "Companies post openings. Candidates apply and track every application.",
 };
