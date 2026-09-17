@@ -35,4 +35,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ default: false })
+  isEmailVerified: boolean;
 }
