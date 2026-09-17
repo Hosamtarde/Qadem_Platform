@@ -20,14 +20,56 @@ export interface SeedCompany {
   jobs: SeedJob[];
 }
 
-export const SEED_PASSWORD = "password123";
+// Demo accounts only. Rotate this before sharing the platform publicly.
+export const SEED_PASSWORD = "lRYGrzau5WtLDS57";
 
 export const seedCompanies: SeedCompany[] = [
+  {
+    email: "wahj@example.com",
+    name: "Wahj",
+    description:
+      "A Palestinian software startup based in Hebron. We turn ideas into digital products and offer a full set of services for teams that want to build and grow online.",
+    website: "https://wahj.co",
+    location: "Hebron",
+    jobs: [
+      {
+        title: "Frontend Development Intern",
+        description:
+          "Learn by shipping. You will work on real client interfaces alongside our team, with review and feedback at every step.",
+        requirements: "HTML, CSS, JavaScript basics, some React exposure.",
+        type: JobType.INTERNSHIP,
+        location: "Hebron",
+        salaryMin: 1000,
+        salaryMax: 1800,
+      },
+      {
+        title: "UI/UX Designer",
+        description:
+          "Design the interfaces for our client projects. A part time role for a designer who thinks in systems, not just screens.",
+        requirements: "Figma, design systems, a portfolio of shipped work.",
+        type: JobType.PART_TIME,
+        location: "Hebron",
+        salaryMin: 2500,
+        salaryMax: 4500,
+      },
+      {
+        title: "Full Stack Developer",
+        description:
+          "Own features end to end across our client products, from the database schema through to the interface the user touches.",
+        requirements:
+          "TypeScript, React, Node.js, relational databases, two years of experience.",
+        type: JobType.FULL_TIME,
+        location: "Hebron",
+        salaryMin: 4500,
+        salaryMax: 8000,
+      },
+    ],
+  },
   {
     email: "asal@example.com",
     name: "ASAL Technologies",
     description:
-      "A Palestinian software R&D and outsourcing company with offices across the West Bank and Gaza. We build frontend, backend, mobile and cloud systems for local and international partners, and run a hardware design verification practice.",
+      "A Palestinian software R&D and outsourcing company with offices across the West Bank and Gaza. We build frontend, backend, mobile and cloud systems for local and international partners.",
     website: "https://asaltech.com",
     location: "Rawabi",
     jobs: [
@@ -100,7 +142,8 @@ export const seedCompanies: SeedCompany[] = [
         title: "Technical Writer",
         description:
           "Write the documentation our clients read. This is a part time role for someone who can turn engineering detail into clear English.",
-        requirements: "Strong written English, comfort reading technical material.",
+        requirements:
+          "Strong written English, comfort reading technical material.",
         type: JobType.PART_TIME,
         location: "Nablus",
         salaryMin: 2000,
@@ -112,7 +155,7 @@ export const seedCompanies: SeedCompany[] = [
     email: "harri@example.com",
     name: "Harri",
     description:
-      "A workforce platform for the hospitality industry, headquartered in New York. Our Ramallah office on Jerusalem Street is the engineering and product foundation of the company.",
+      "A workforce platform for the hospitality industry, headquartered in New York. Our Ramallah office is the engineering and product foundation of the company.",
     website: "https://harri.com",
     location: "Ramallah",
     jobs: [
@@ -128,106 +171,14 @@ export const seedCompanies: SeedCompany[] = [
         salaryMax: 14000,
       },
       {
-        title: "iOS Developer",
+        title: "Mobile Developer",
         description:
-          "Build and ship features in our iOS application used daily by hospitality staff. You will own releases and work directly with product.",
-        requirements: "Swift, UIKit or SwiftUI, App Store release experience.",
+          "Build and ship features in the mobile app used daily by hospitality staff. You will own releases and work directly with product.",
+        requirements: "Flutter or React Native, REST API integration.",
         type: JobType.FULL_TIME,
         location: "Ramallah",
         salaryMin: 6000,
         salaryMax: 11000,
-      },
-      {
-        title: "Scrum Master",
-        description:
-          "Support two engineering teams. You will run the ceremonies, remove blockers, and keep delivery predictable without adding process for its own sake.",
-        requirements:
-          "Agile facilitation experience, comfort working with engineers.",
-        type: JobType.FULL_TIME,
-        location: "Ramallah",
-        salaryMin: 5500,
-        salaryMax: 9000,
-      },
-    ],
-  },
-  {
-    email: "ahllogics@example.com",
-    name: "AHL Logics",
-    description:
-      "A US company with its engineering team based in Hebron. We work on research, advanced design and applied engineering across technology, telecom, infrastructure and automation.",
-    website: "https://ahllogics.com",
-    location: "Hebron",
-    jobs: [
-      {
-        title: "Site Reliability Engineer",
-        description:
-          "Keep our production systems healthy. You will handle monitoring, incident response, and the slow work of making failures less likely.",
-        requirements:
-          "Linux, monitoring and alerting tools, scripting, on call experience.",
-        type: JobType.FULL_TIME,
-        location: "Hebron",
-        salaryMin: 7000,
-        salaryMax: 12000,
-      },
-      {
-        title: "NOC Engineer",
-        description:
-          "Monitor network and platform health, triage alerts, and escalate what needs a human. This role works on a rotating shift.",
-        requirements: "Networking fundamentals, calm under pressure.",
-        type: JobType.FULL_TIME,
-        location: "Hebron",
-        salaryMin: 3500,
-        salaryMax: 6000,
-      },
-    ],
-  },
-  {
-    email: "wahj@example.com",
-    name: "Wahj",
-    description:
-      "A Palestinian software startup based in Hebron. We turn ideas into digital products and offer a full set of services for teams that want to build and grow online.",
-    website: "https://wahj.co",
-    location: "Hebron",
-    jobs: [
-      {
-        title: "Frontend Development Intern",
-        description:
-          "Learn by shipping. You will work on real client interfaces alongside our team, with review and feedback at every step.",
-        requirements: "HTML, CSS, JavaScript basics, some React exposure.",
-        type: JobType.INTERNSHIP,
-        location: "Hebron",
-        salaryMin: 1000,
-        salaryMax: 1800,
-      },
-      {
-        title: "UI/UX Designer",
-        description:
-          "Design the interfaces for our client projects. A part time role for a designer who thinks in systems, not just screens.",
-        requirements: "Figma, design systems, a portfolio of shipped work.",
-        type: JobType.PART_TIME,
-        location: "Hebron",
-        salaryMin: 2500,
-        salaryMax: 4500,
-      },
-    ],
-  },
-  {
-    email: "aeliasoft@example.com",
-    name: "Aeliasoft",
-    description:
-      "A Palestinian technology company building tailored digital solutions. Our work spans custom applications, web platforms, mobile apps, system integration and chip design verification.",
-    website: "https://aeliasoft.com",
-    location: "Ramallah",
-    jobs: [
-      {
-        title: "Mobile Developer",
-        description:
-          "Build cross platform mobile applications for our clients. You will take features from design through to release.",
-        requirements: "Flutter or React Native, REST API integration.",
-        type: JobType.FULL_TIME,
-        location: "Ramallah",
-        salaryMin: 4500,
-        salaryMax: 8000,
       },
       {
         title: "Software Testing Intern",
@@ -245,43 +196,43 @@ export const seedCompanies: SeedCompany[] = [
 
 export const seedCandidates = [
   {
-    email: "hosam@example.com",
-    fullName: "Hosam Taradeh",
-    headline: "Backend Developer",
-    location: "Hebron",
-    skills: ["NestJS", "TypeScript", "PostgreSQL", "Docker", "TypeORM"],
-    yearsOfExperience: 2,
-    bio: "I build REST APIs with NestJS and PostgreSQL, and care about how a system is structured before it is written.",
-    resumeUrl: "https://example.com/hosam-cv",
-  },
-  {
-    email: "mohammed@example.com",
-    fullName: "Mohammed Tarade",
-    headline: "Full Stack Developer",
-    location: "Hebron",
-    skills: ["React", "Next.js", "NestJS", "Tailwind CSS"],
-    yearsOfExperience: 2,
-    bio: "Comfortable across the stack, with a preference for clean interfaces backed by well designed APIs.",
-    resumeUrl: "https://example.com/mohammed-cv",
-  },
-  {
-    email: "malik@example.com",
-    fullName: "Malik Tayyem",
-    headline: "Mobile Developer",
+    email: "layla@example.com",
+    fullName: "Layla Odeh",
+    headline: "Frontend Developer",
     location: "Ramallah",
-    skills: ["Flutter", "Dart", "Firebase", "REST APIs"],
+    skills: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
     yearsOfExperience: 3,
-    bio: "Cross platform mobile developer shipping production apps for local businesses.",
-    resumeUrl: "https://example.com/malik-cv",
+    bio: "Demo profile. Frontend developer who cares about how an interface behaves under real use, not just how it looks.",
+    resumeUrl: "https://example.com/layla-cv",
   },
   {
-    email: "sami@example.com",
-    fullName: "Sami Ghaith",
-    headline: "Computer Science Student",
+    email: "karim@example.com",
+    fullName: "Karim Hijazi",
+    headline: "Backend Developer",
     location: "Nablus",
+    skills: ["NestJS", "TypeScript", "PostgreSQL", "Docker"],
+    yearsOfExperience: 2,
+    bio: "Demo profile. Builds REST APIs with NestJS and PostgreSQL, and thinks about structure before writing code.",
+    resumeUrl: "https://example.com/karim-cv",
+  },
+  {
+    email: "nour@example.com",
+    fullName: "Nour Salameh",
+    headline: "Mobile Developer",
+    location: "Hebron",
+    skills: ["Flutter", "Dart", "Firebase", "REST APIs"],
+    yearsOfExperience: 4,
+    bio: "Demo profile. Cross platform mobile developer shipping production apps for local businesses.",
+    resumeUrl: "https://example.com/nour-cv",
+  },
+  {
+    email: "adam@example.com",
+    fullName: "Adam Barakat",
+    headline: "Computer Science Student",
+    location: "Bethlehem",
     skills: ["JavaScript", "Python", "Git", "SQL"],
     yearsOfExperience: 0,
-    bio: "Final year student looking for a first internship where I can learn from a real codebase.",
+    bio: "Demo profile. Final year student looking for a first internship with a real codebase.",
   },
 ];
 
@@ -296,16 +247,25 @@ export interface SeedApplication {
 
 export const seedApplications: SeedApplication[] = [
   {
-    candidateEmail: "hosam@example.com",
+    candidateEmail: "layla@example.com",
     companyEmail: "harri@example.com",
     jobTitle: "Senior Frontend Engineer",
     status: "REVIEWING",
     coverLetter:
-      "I have spent the last two years building APIs, and I want to move closer to the product side without leaving engineering.",
-    companyNote: "Strong backend background. Worth a technical screen.",
+      "Three years on React products with real traffic, including a rewrite that cut our first paint in half.",
+    companyNote: "Strong portfolio. Worth a technical screen.",
   },
   {
-    candidateEmail: "hosam@example.com",
+    candidateEmail: "layla@example.com",
+    companyEmail: "wahj@example.com",
+    jobTitle: "UI/UX Designer",
+    status: "REJECTED",
+    coverLetter:
+      "I design the interfaces I build, and I would like to focus more on the design side.",
+    companyNote: "Looking for a dedicated designer rather than a hybrid role.",
+  },
+  {
+    candidateEmail: "karim@example.com",
     companyEmail: "foothill@example.com",
     jobTitle: "Backend Engineer",
     status: "ACCEPTED",
@@ -314,32 +274,23 @@ export const seedApplications: SeedApplication[] = [
     companyNote: "Offer sent. Start date to be confirmed.",
   },
   {
-    candidateEmail: "mohammed@example.com",
-    companyEmail: "harri@example.com",
-    jobTitle: "Senior Frontend Engineer",
+    candidateEmail: "karim@example.com",
+    companyEmail: "wahj@example.com",
+    jobTitle: "Full Stack Developer",
     status: "SUBMITTED",
     coverLetter:
       "I work across React and NestJS, so I understand both sides of the contract between them.",
   },
   {
-    candidateEmail: "mohammed@example.com",
-    companyEmail: "wahj@example.com",
-    jobTitle: "UI/UX Designer",
-    status: "REJECTED",
-    coverLetter:
-      "I design the interfaces I build, and I would like to focus more on the design side.",
-    companyNote: "We are looking for a dedicated designer rather than a hybrid role.",
-  },
-  {
-    candidateEmail: "malik@example.com",
-    companyEmail: "aeliasoft@example.com",
+    candidateEmail: "nour@example.com",
+    companyEmail: "harri@example.com",
     jobTitle: "Mobile Developer",
     status: "REVIEWING",
     coverLetter:
-      "Three years with Flutter, including two apps currently live on both stores.",
+      "Four years with Flutter, including two apps currently live on both stores.",
   },
   {
-    candidateEmail: "sami@example.com",
+    candidateEmail: "adam@example.com",
     companyEmail: "asal@example.com",
     jobTitle: "R&D Engineering Intern",
     status: "SUBMITTED",
@@ -347,7 +298,7 @@ export const seedApplications: SeedApplication[] = [
       "Final year computer science student. I want an internship where I read real code, not tutorials.",
   },
   {
-    candidateEmail: "sami@example.com",
+    candidateEmail: "adam@example.com",
     companyEmail: "wahj@example.com",
     jobTitle: "Frontend Development Intern",
     status: "SUBMITTED",
