@@ -49,4 +49,8 @@ export class UsersService {
       .addSelect('user.hashedRefreshToken')
       .getOne();
   }
+
+  async markEmailVerified(id: string): Promise<void> {
+    await this.usersRepository.update(id, { isEmailVerified: true });
+  }
 }
