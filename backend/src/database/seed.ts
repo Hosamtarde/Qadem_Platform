@@ -50,6 +50,7 @@ async function seed() {
         password: hashedPassword,
         fullName: item.name,
         role: UserRole.COMPANY,
+        isEmailVerified: true,
       }),
     );
 
@@ -60,6 +61,7 @@ async function seed() {
         description: item.description,
         website: item.website,
         location: item.location,
+        
       }),
     );
 
@@ -90,6 +92,7 @@ async function seed() {
         password: hashedPassword,
         fullName: candidate.fullName,
         role: UserRole.CANDIDATE,
+        isEmailVerified: true,
       }),
     );
 
