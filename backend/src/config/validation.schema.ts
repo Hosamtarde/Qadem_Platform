@@ -15,4 +15,8 @@ export const validationSchema = Joi.object({
   JWT_ACCESS_EXPIRES_IN: Joi.string().default('15m'),
   JWT_REFRESH_SECRET: Joi.string().required(),
   JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
+
+  RESEND_API_KEY: Joi.string().default('re_test_key'),
+  MAIL_FROM: Joi.string().default('Qadem <noreply@qadem.site>'),
+  FRONTEND_URL: Joi.string().default('http://localhost:3000'),
 });

@@ -9,7 +9,8 @@ export class MailService {
   private readonly from: string;
 
   constructor(private readonly config: ConfigService) {
-    this.resend = new Resend(this.config.get<string>('RESEND_API_KEY'));
+    const key = this.config.get<string>('RESEND_API_KEY') ?? 're_test_key';
+    this.resend = new Resend(key);
     this.from = this.config.get<string>('MAIL_FROM') ?? 'Qadem <noreply@qadem.site>';
   }
 
