@@ -22,7 +22,12 @@ import { APP_GUARD } from '@nestjs/core';
       
     }),
 
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
+      ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60000, limit: 60 }],
+      skipIf: () => process.env.NODE_ENV === 'test',
+    }),
+
+    
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

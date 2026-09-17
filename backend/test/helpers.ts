@@ -4,11 +4,15 @@ import { DataSource } from "typeorm";
 import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { AllExceptionsFilter } from "../src/common/filters/all-exceptions.filter";
+import { ThrottlerGuard } from "@nestjs/throttler";
 
 export async function createTestApp(): Promise<INestApplication> {
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideGuard(ThrottlerGuard)
+    .useValue({ canActivate: () => true })
+    .compile();
 
   const app = moduleRef.createNestApplication();
 
@@ -25,6 +29,7 @@ export async function createTestApp(): Promise<INestApplication> {
   await app.init();
   return app;
 }
+
 
 export async function clearDatabase(app: INestApplication): Promise<void> {
   const dataSource = app.get(DataSource);
@@ -44,10 +49,24 @@ export async function registerUser(
   role: "CANDIDATE" | "COMPANY",
   fullName = "Test User",
 ): Promise<AuthResult> {
-  const res = await request(app.getHttpServer())
+  await request(app.getHttpServer())
     .post("/api/auth/register")
     .send({ email, password: "password123", fullName, role })
     .expect(201);
+
+  // Verification is mandatory in production, but these tests exercise
+  // job and application logic, not the email flow. Mark the account
+  // verified directly so no real email round-trip is needed.
+  const dataSource = app.get(DataSource);
+  await dataSource.query(
+    'UPDATE "users" SET "isEmailVerified" = true WHERE "email" = $1',
+    [email],
+  );
+
+  const res = await request(app.getHttpServer())
+    .post("/api/auth/login")
+    .send({ email, password: "password123" })
+    .expect(200);
 
   return { token: res.body.accessToken, userId: res.body.user.id };
 }
