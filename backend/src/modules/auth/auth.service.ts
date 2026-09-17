@@ -76,10 +76,7 @@ export class AuthService {
     }
 
     if (!user.isEmailVerified) {
-      throw new UnauthorizedException({
-        code: 'EMAIL_NOT_VERIFIED',
-        message: 'Email not verified',
-      });
+            throw new UnauthorizedException('EMAIL_NOT_VERIFIED');
     }
 
     return this.issueTokens(user);
