@@ -34,7 +34,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
-
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+    
   await app.listen(port);
   console.log(`Application running on http://localhost:${port}/api`);
 }

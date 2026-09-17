@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { ApiRequestError } from "@/lib/api";
+import { resendVerification } from "@/lib/auth";
 import Particles from "@/components/particles";
 import Logo from "@/components/logo";
 
@@ -13,21 +14,49 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [unverified, setUnverified] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">(
+    "idle",
+  );
+  const [resendError, setResendError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setUnverified(false);
+    setResendState("idle");
+    setResendError("");
     setSubmitting(true);
     try {
       await login(email, password);
     } catch (err) {
       if (err instanceof ApiRequestError) {
-        setError(err.messages.join(", "));
+        if (err.messages.includes("EMAIL_NOT_VERIFIED")) {
+          setUnverified(true);
+        } else {
+          setError(err.messages.join(", "));
+        }
       } else {
         setError("Could not reach the server. Check your connection.");
       }
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleResend() {
+    setResendState("sending");
+    setResendError("");
+    try {
+      await resendVerification(email);
+      setResendState("sent");
+    } catch (err) {
+      setResendState("idle");
+      if (err instanceof ApiRequestError && err.statusCode === 429) {
+        setResendError("Too many attempts. Try again later.");
+      } else {
+        setResendError("Could not send the email. Try again.");
+      }
     }
   }
 
@@ -111,6 +140,39 @@ export default function LoginPage() {
               <p className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
                 {error}
               </p>
+            )}
+
+            {unverified && (
+              <div className="rounded-lg border border-line bg-panel px-4 py-4 text-sm">
+                <p className="font-medium text-text">
+                  This account is not verified yet
+                </p>
+                <p className="mt-1.5 leading-relaxed text-muted">
+                  Open the link we emailed you to activate the account, then
+                  sign in.
+                </p>
+
+                {resendState === "sent" ? (
+                  <p className="mt-3 text-brand">
+                    A new link is on its way to {email}.
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendState === "sending"}
+                    className="mt-3 font-medium text-brand underline underline-offset-4 transition hover:text-brand-soft disabled:opacity-50"
+                  >
+                    {resendState === "sending"
+                      ? "Sending"
+                      : "Send the link again"}
+                  </button>
+                )}
+
+                {resendError && (
+                  <p className="mt-2 text-danger">{resendError}</p>
+                )}
+              </div>
             )}
 
             <button

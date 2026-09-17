@@ -16,13 +16,15 @@ export default function RegisterPage() {
   const [role, setRole] = useState<UserRole>("CANDIDATE");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [sentTo, setSentTo] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     try {
-      await register({ fullName, email, password, role });
+      const res = await register({ fullName, email, password, role });
+      setSentTo(res.email);
     } catch (err) {
       if (err instanceof ApiRequestError) {
         setError(err.messages.join(", "));
@@ -38,6 +40,34 @@ export default function RegisterPage() {
 
   const field =
     "mt-2 w-full rounded-lg border border-line bg-panel px-4 py-3 text-text placeholder:text-muted/50 outline-none transition focus:border-brand";
+
+  if (sentTo) {
+    return (
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-6">
+        <div className="glow" />
+        <div className="relative z-10 w-full max-w-sm text-center">
+          <Logo />
+          <h1 className="mt-8 font-display text-3xl font-bold text-text">
+            Check your inbox
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            We sent a verification link to{" "}
+            <span className="text-text">{sentTo}</span>. Click it to activate
+            your account, then sign in.
+          </p>
+          <p className="mt-2 text-xs text-muted/60">
+            The link expires in 2 hours.
+          </p>
+          <Link
+            href="/login"
+            className="btn-primary mt-8 inline-block rounded-lg px-6 py-3 font-semibold"
+          >
+            Go to sign in
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">

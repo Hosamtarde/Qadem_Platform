@@ -8,15 +8,26 @@ import { CompaniesModule } from './modules/companies/companies.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { ApplicationsModule } from './modules/applications/applications.module';
 import { CandidatesModule } from './modules/candidates/candidates.module';
+import { MailModule } from './modules/mail/mail.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+
       isGlobal: true,
       load: [configuration],
       validationSchema,
       
     }),
+
+      ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60000, limit: 60 }],
+      skipIf: () => process.env.NODE_ENV === 'test',
+    }),
+
+    
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -39,6 +50,8 @@ import { CandidatesModule } from './modules/candidates/candidates.module';
     JobsModule,
     ApplicationsModule,
     CandidatesModule,
+    MailModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
