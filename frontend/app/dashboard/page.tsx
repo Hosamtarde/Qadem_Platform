@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { listMyJobs } from "@/lib/jobs";
+import { getMyCompany } from "@/lib/companies";
 import {
   companyApplicationStats,
   myApplicationStats,
 } from "@/lib/applications";
 import {
   ApplicationStatus,
+  Company,
   StatusCounts,
   STATUS_BADGES,
   STATUS_LABELS,
@@ -30,6 +32,7 @@ export default function DashboardPage() {
   const [totalJobs, setTotalJobs] = useState<number | null>(null);
   const [liveJobs, setLiveJobs] = useState<number | null>(null);
   const [stats, setStats] = useState<StatusCounts | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -52,6 +55,10 @@ export default function DashboardPage() {
       companyApplicationStats()
         .then(setStats)
         .catch(() => setStats(null));
+
+      getMyCompany()
+        .then(setCompany)
+        .catch(() => setCompany(null));
     } else {
       myApplicationStats()
         .then(setStats)
@@ -94,6 +101,16 @@ export default function DashboardPage() {
 
   const pipelineTotal = totalApplications ?? 0;
 
+  const rate = company?.responseRate ?? null;
+  const rateTone =
+    rate === null
+      ? "text-muted"
+      : rate >= 70
+        ? "text-success"
+        : rate >= 40
+          ? "text-brand"
+          : "text-text";
+
   return (
     <>
       <header className="flex items-center justify-between border-b border-line px-6 py-5 lg:px-10">
@@ -124,6 +141,68 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+
+        {!isCandidate && company && (
+          <section className="surface mt-5 rounded-xl p-7">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold text-brand">
+                Your response score
+              </h2>
+              {company.responseIsPublic ? (
+                <span className="badge badge-success">
+                  Shown to candidates
+                </span>
+              ) : (
+                <span className="badge badge-neutral">Not shown yet</span>
+              )}
+            </div>
+
+            {rate === null ? (
+              <p className="mt-4 text-sm text-muted">
+                No applications yet. Your score starts once candidates apply.
+              </p>
+            ) : (
+              <>
+                <div className="mt-6 flex flex-wrap items-end gap-10">
+                  <div>
+                    <p
+                      className={`font-display text-4xl font-bold tabular-nums ${rateTone}`}
+                    >
+                      {rate}%
+                    </p>
+                    <p className="mt-1 text-sm text-muted">
+                      of applicants got a reply
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-display text-4xl font-bold tabular-nums text-text">
+                      {company.avgResponseDays ?? "-"}
+                    </p>
+                    <p className="mt-1 text-sm text-muted">
+                      days to reply on average
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-display text-4xl font-bold tabular-nums text-text">
+                      {company.responseSampleSize}
+                    </p>
+                    <p className="mt-1 text-sm text-muted">
+                      applications measured
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rule my-7" />
+
+                <p className="text-sm text-muted">
+                  {company.responseIsPublic
+                    ? "Candidates see this on every opening you post. Replying to applications still waiting is what moves it."
+                    : `Candidates see nothing until you reach 10 applications. ${10 - company.responseSampleSize} to go.`}
+                </p>
+              </>
+            )}
+          </section>
+        )}
 
         <section className="surface mt-5 rounded-xl p-7">
           <div className="flex flex-wrap items-center justify-between gap-3">

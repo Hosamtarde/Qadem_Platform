@@ -6,6 +6,7 @@ import { Job } from "../modules/jobs/entities/job.entity";
 import { CandidateProfile } from "../modules/candidates/entities/candidate-profile.entity";
 import { Application } from "../modules/applications/entities/application.entity";
 import { ApplicationStatus, UserRole } from "../common/enums";
+import { seedResponseProfiles } from "./seed-data";
 import {
   SEED_PASSWORD,
   seedApplications,
@@ -149,6 +150,105 @@ async function seed() {
   }
 
   console.log("");
+    console.log("");
+  console.log("Response history:");
+
+  const bulkCandidates: User[] = [];
+
+  // Filler candidates exist only to carry applications. They are not open
+  // to work, so they never surface in talent search.
+  for (let i = 0; i < 60; i += 1) {
+    const user = await usersRepo.save(
+      usersRepo.create({
+        email: `applicant${i + 1}@example.com`,
+        password: hashedPassword,
+        fullName: `Applicant ${i + 1}`,
+        role: UserRole.CANDIDATE,
+        isEmailVerified: true,
+      }),
+    );
+
+    await profilesRepo.save(
+      profilesRepo.create({
+        userId: user.id,
+        headline: "Software Developer",
+        location: "Palestine",
+        skills: [],
+        isOpenToWork: false,
+      }),
+    );
+
+    bulkCandidates.push(user);
+  }
+
+  let historyCount = 0;
+
+  for (const profile of seedResponseProfiles) {
+    const company = companyByEmail.get(profile.companyEmail);
+    if (!company) continue;
+
+    const companyJobs = Array.from(jobByKey.entries())
+      .filter(([key]) => key.startsWith(`${profile.companyEmail}::`))
+      .map(([, job]) => job);
+
+    if (companyJobs.length === 0) continue;
+
+    const answeredTarget = Math.round(
+      profile.totalApplications * profile.answeredRatio,
+    );
+
+    for (let i = 0; i < profile.totalApplications; i += 1) {
+      const candidate = bulkCandidates[i % bulkCandidates.length];
+      const job = companyJobs[i % companyJobs.length];
+
+      const existing = await applicationsRepo.findOne({
+        where: { jobId: job.id, candidateId: candidate.id },
+      });
+      if (existing) continue;
+
+      const createdAt = new Date();
+      createdAt.setDate(createdAt.getDate() - (20 + (i % 100)));
+
+      const answered = i < answeredTarget;
+      let respondedAt: Date | null = null;
+      let status = ApplicationStatus.SUBMITTED;
+
+      if (answered) {
+        // Vary each response around the company's average.
+        const spread = (i % 5) - 2;
+        const days = Math.max(1, profile.avgDays + spread);
+        respondedAt = new Date(createdAt);
+        respondedAt.setDate(respondedAt.getDate() + days);
+
+        status =
+          i % 4 === 0
+            ? ApplicationStatus.ACCEPTED
+            : i % 3 === 0
+              ? ApplicationStatus.REVIEWING
+              : ApplicationStatus.REJECTED;
+      }
+
+      await applicationsRepo.save(
+        applicationsRepo.create({
+          jobId: job.id,
+          candidateId: candidate.id,
+          coverLetter: null,
+          status,
+          respondedAt,
+          createdAt,
+        }),
+      );
+
+      historyCount += 1;
+    }
+
+    console.log(
+      `  ${company.name}: ${profile.totalApplications} applications, ${Math.round(profile.answeredRatio * 100)}% answered`,
+    );
+  }
+
+  console.log("");
+  console.log(`  History applications: ${historyCount}`);
   console.log("Done.");
   console.log(`  Companies:    ${companyByEmail.size}`);
   console.log(`  Jobs:         ${jobCount}`);

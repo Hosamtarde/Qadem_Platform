@@ -29,6 +29,10 @@ export interface Company {
   logoUrl: string | null;
   createdAt: string;
   updatedAt: string;
+  responseRate: number | null;
+  avgResponseDays: number | null;
+  responseSampleSize: number;
+  responseIsPublic: boolean;
 }
 
 export interface CompanySummary {
@@ -36,6 +40,9 @@ export interface CompanySummary {
   name: string;
   location: string | null;
   logoUrl: string | null;
+  responseRate: number | null;
+  avgResponseDays: number | null;
+  responseSampleSize: number;
 }
 
 export interface Job {
@@ -52,6 +59,9 @@ export interface Job {
   company?: CompanySummary;
   createdAt: string;
   updatedAt: string;
+  responseRate: number | null;
+  avgResponseDays: number | null;
+  responseSampleSize: number;
 }
 
 export interface ApiError {

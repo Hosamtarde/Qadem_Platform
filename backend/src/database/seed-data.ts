@@ -311,4 +311,39 @@ export const seedApplications: SeedApplication[] = [
   },
 ];
 
+
+export interface SeedResponseProfile {
+  companyEmail: string;
+  totalApplications: number;
+  answeredRatio: number;
+  avgDays: number;
+}
+
+export const seedResponseProfiles: SeedResponseProfile[] = [
+  {
+    companyEmail: "foothill@example.com",
+    totalApplications: 52,
+    answeredRatio: 0.83,
+    avgDays: 4,
+  },
+  {
+    companyEmail: "wahj@example.com",
+    totalApplications: 28,
+    answeredRatio: 0.61,
+    avgDays: 8,
+  },
+  {
+    companyEmail: "asal@example.com",
+    totalApplications: 44,
+    answeredRatio: 0.34,
+    avgDays: 17,
+  },
+  {
+    companyEmail: "harri@example.com",
+    totalApplications: 6,
+    answeredRatio: 0.5,
+    avgDays: 5,
+  },
+];
+
 export const seedRole = UserRole;

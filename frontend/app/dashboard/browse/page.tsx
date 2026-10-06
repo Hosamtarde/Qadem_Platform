@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { listJobs } from "@/lib/jobs";
+import ResponseBadge from "@/components/response-badge";
 import {
   Job,
   JobType,
@@ -207,7 +208,7 @@ function BrowseView() {
                 href={`/jobs/${job.id}`}
                 className="surface surface-hover flex flex-col rounded-xl p-6"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-start gap-3">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line bg-panel-2 text-xs font-semibold text-brand-soft">
                     {initials(org)}
                   </span>
@@ -218,6 +219,15 @@ function BrowseView() {
                     <p className="truncate text-xs text-muted">
                       {job.location}
                     </p>
+                    {job.company && (
+                      <span className="mt-1.5 block">
+                        <ResponseBadge
+                          rate={job.company.responseRate}
+                          avgDays={job.company.avgResponseDays}
+                          sampleSize={job.company.responseSampleSize}
+                        />
+                      </span>
+                    )}
                   </div>
                 </div>
 
