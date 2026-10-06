@@ -162,6 +162,7 @@ export interface CandidateProfile {
   hasResumeFile: boolean;
   createdAt: string;
   updatedAt: string;
+  isOpenToWork: boolean;
 }
 
 export interface UpdateCandidateProfileInput {
@@ -175,4 +176,5 @@ export interface UpdateCandidateProfileInput {
   githubUrl?: string;
   portfolioUrl?: string;
   resumeUrl?: string;
+  isOpenToWork?: boolean;
 }
