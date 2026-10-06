@@ -204,6 +204,7 @@ export const seedCandidates = [
     yearsOfExperience: 3,
     bio: "Demo profile. Frontend developer who cares about how an interface behaves under real use, not just how it looks.",
     resumeUrl: "https://example.com/layla-cv",
+    isOpenToWork: true,
   },
   {
     email: "karim@example.com",
@@ -214,6 +215,7 @@ export const seedCandidates = [
     yearsOfExperience: 2,
     bio: "Demo profile. Builds REST APIs with NestJS and PostgreSQL, and thinks about structure before writing code.",
     resumeUrl: "https://example.com/karim-cv",
+    isOpenToWork: true,
   },
   {
     email: "nour@example.com",
@@ -224,6 +226,7 @@ export const seedCandidates = [
     yearsOfExperience: 4,
     bio: "Demo profile. Cross platform mobile developer shipping production apps for local businesses.",
     resumeUrl: "https://example.com/nour-cv",
+    isOpenToWork: true,
   },
   {
     email: "adam@example.com",
@@ -233,6 +236,7 @@ export const seedCandidates = [
     skills: ["JavaScript", "Python", "Git", "SQL"],
     yearsOfExperience: 0,
     bio: "Demo profile. Final year student looking for a first internship with a real codebase.",
+    isOpenToWork: false,
   },
 ];
 

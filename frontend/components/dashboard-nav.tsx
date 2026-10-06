@@ -11,12 +11,14 @@ const candidateNav = [
   { label: "Overview", href: "/dashboard" },
   { label: "Browse jobs", href: "/dashboard/browse" },
   { label: "My applications", href: "/dashboard/applications" },
+  { label: "Invitations", href: "/dashboard/invitations" },
   { label: "Profile", href: "/dashboard/profile" },
 ];
 
 const companyNav = [
   { label: "Overview", href: "/dashboard" },
   { label: "My postings", href: "/dashboard/jobs" },
+  { label: "Find talent", href: "/dashboard/talent" },
   { label: "Applicants", href: "/dashboard/applicants" },
   { label: "Company profile", href: "/dashboard/company" },
 ];

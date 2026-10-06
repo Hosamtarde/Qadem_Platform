@@ -1,6 +1,7 @@
 import {
   ArrayMaxSize,
   IsArray,
+  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -9,7 +10,6 @@ import {
   Max,
   MaxLength,
   Min,
-  MinLength,
 } from "class-validator";
 
 export class UpdateCandidateProfileDto {
@@ -67,4 +67,8 @@ export class UpdateCandidateProfileDto {
   @IsUrl({}, { message: "Resume URL is not valid" })
   @MaxLength(500)
   resumeUrl?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isOpenToWork?: boolean;
 }

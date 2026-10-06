@@ -26,6 +26,7 @@ export default function CandidateProfilePage() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [togglingOpen, setTogglingOpen] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
 
@@ -72,6 +73,22 @@ export default function CandidateProfilePage() {
     setError("");
     setSaved(false);
     setEditing(true);
+  }
+
+  async function toggleOpenToWork() {
+    if (!profile) return;
+    setError("");
+    setTogglingOpen(true);
+    try {
+      const updated = await updateMyProfile({
+        isOpenToWork: !profile.isOpenToWork,
+      });
+      setProfile(updated);
+    } catch {
+      setError("Could not update your availability.");
+    } finally {
+      setTogglingOpen(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -191,9 +208,83 @@ export default function CandidateProfilePage() {
           </p>
         )}
 
+        {profile && (
+          <section
+            className={
+              profile.isOpenToWork
+                ? "mt-6 flex flex-wrap items-center justify-between gap-5 rounded-xl border border-brand/40 bg-brand/[0.07] p-6"
+                : "surface mt-6 flex flex-wrap items-center justify-between gap-5 rounded-xl p-6"
+            }
+          >
+            <div className="flex items-start gap-4">
+              <span
+                className={
+                  profile.isOpenToWork
+                    ? "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/20 text-brand ring-1 ring-brand/30"
+                    : "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-panel-2 text-muted"
+                }
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+              </span>
+
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h2 className="text-base font-semibold text-text">
+                    Open to work
+                  </h2>
+                  {profile.isOpenToWork && (
+                    <span className="flex items-center gap-1.5 rounded-full bg-brand/15 px-2.5 py-0.5 text-[11px] font-semibold text-brand">
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_6px_rgba(46,116,181,0.9)]" />
+                      Visible
+                    </span>
+                  )}
+                </div>
+
+                <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">
+                  {profile.isOpenToWork
+                    ? "Companies searching for talent can find your profile and invite you to roles. Your phone number and resume stay private until you accept an invitation."
+                    : "Turn this on to let companies discover you and send you invitations. You stay hidden from search until you do."}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={toggleOpenToWork}
+              disabled={togglingOpen}
+              role="switch"
+              aria-checked={profile.isOpenToWork}
+              className={
+                profile.isOpenToWork
+                  ? "relative h-7 w-12 shrink-0 rounded-full bg-brand transition disabled:opacity-50"
+                  : "relative h-7 w-12 shrink-0 rounded-full bg-line transition disabled:opacity-50"
+              }
+            >
+              <span
+                className={
+                  profile.isOpenToWork
+                    ? "absolute left-6 top-1 h-5 w-5 rounded-full bg-white shadow transition-all"
+                    : "absolute left-1 top-1 h-5 w-5 rounded-full bg-muted/60 shadow transition-all"
+                }
+              />
+            </button>
+          </section>
+        )}
+
         {!editing && profile && (
           <>
-            <section className="surface mt-6 rounded-xl p-8">
+            <section className="surface mt-4 rounded-xl p-8">
               <div className="flex flex-wrap items-start gap-5">
                 <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border border-line bg-panel-2 font-display text-lg font-bold text-brand-soft">
                   {initials}
@@ -342,7 +433,7 @@ export default function CandidateProfilePage() {
         )}
 
         {editing && (
-          <form onSubmit={handleSubmit} className="surface mt-6 rounded-xl p-8">
+          <form onSubmit={handleSubmit} className="surface mt-4 rounded-xl p-8">
             <div className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>

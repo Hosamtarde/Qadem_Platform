@@ -21,6 +21,9 @@ import { CandidateProfileResponseDto } from "./dto/candidate-profile-response.dt
 import { resumeUploadOptions } from "./resume-upload.config";
 import { CurrentUser, Roles } from "../../common/decorators";
 import { UserRole } from "../../common/enums";
+import { SearchCandidatesDto } from "./dto/search-candidates.dto";
+import { CandidateCardDto } from "./dto/candidate-card.dto";
+import { Query } from "@nestjs/common";
 
 @ApiTags("candidates")
 @ApiBearerAuth()
@@ -73,6 +76,18 @@ export class CandidatesController {
   async removeResume(@CurrentUser("id") userId: string) {
     const profile = await this.candidatesService.removeResume(userId);
     return new CandidateProfileResponseDto(profile);
+  }
+
+  @Roles(UserRole.COMPANY)
+  @Get("search")
+  async search(@Query() dto: SearchCandidatesDto) {
+    const result = await this.candidatesService.search(dto);
+    return {
+      items: result.items.map((p) => new CandidateCardDto(p)),
+      total: result.total,
+      page: result.page,
+      pageSize: result.pageSize,
+    };
   }
 
   @Roles(UserRole.CANDIDATE, UserRole.COMPANY)

@@ -107,6 +107,8 @@ async function seed() {
         skills: candidate.skills ?? [],
         yearsOfExperience: candidate.yearsOfExperience ?? null,
         resumeUrl: candidate.resumeUrl ?? null,
+        isOpenToWork: candidate.isOpenToWork ?? false,
+        openToWorkSince: candidate.isOpenToWork ? new Date() : null,
       }),
     );
 
@@ -160,7 +162,10 @@ async function seed() {
   console.log("");
 
   await dataSource.destroy();
+  
 }
+
+
 
 seed().catch((err) => {
   console.error("Seed failed:", err);
