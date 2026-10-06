@@ -8,9 +8,9 @@ export default function DashboardLayout({
   return (
     <div className="relative min-h-screen">
       <div className="glow" />
-      <div className="relative z-10 flex min-h-screen">
+      <div className="relative z-10 flex min-h-screen flex-col">
         <DashboardNav />
-        <div className="min-w-0 flex-1">{children}</div>
+        <main className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
   );
