@@ -9,6 +9,7 @@ import { promises as fs } from "fs";
 import { join } from "path";
 import { CandidateProfile } from "./entities/candidate-profile.entity";
 import { UpdateCandidateProfileDto } from "./dto/update-candidate-profile.dto";
+import { SearchCandidatesDto } from "./dto/search-candidates.dto";
 
 export const RESUME_DIR = join(process.cwd(), "uploads", "resumes");
 
@@ -49,6 +50,53 @@ export class CandidatesService {
 
     return profile;
   }
+
+  async search(dto: SearchCandidatesDto): Promise<{
+    items: CandidateProfile[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }> {
+    const pageSize = 12;
+    const page = dto.page && dto.page > 0 ? dto.page : 1;
+
+    const qb = this.profilesRepository
+      .createQueryBuilder("profile")
+      .innerJoinAndSelect("profile.user", "user")
+      .where("profile.isOpenToWork = true");
+
+    if (dto.skills?.length) {
+      qb.andWhere("profile.skills && :skills", { skills: dto.skills });
+    }
+
+    if (dto.location) {
+      qb.andWhere("profile.location ILIKE :location", {
+        location: `%${dto.location}%`,
+      });
+    }
+
+    if (dto.minYears !== undefined) {
+      qb.andWhere("profile.yearsOfExperience >= :minYears", {
+        minYears: dto.minYears,
+      });
+    }
+
+    if (dto.q) {
+      qb.andWhere(
+        "(user.fullName ILIKE :q OR profile.headline ILIKE :q OR profile.bio ILIKE :q)",
+        { q: `%${dto.q}%` },
+      );
+    }
+
+    const [items, total] = await qb
+      .orderBy("profile.openToWorkSince", "DESC", "NULLS LAST")
+      .addOrderBy("profile.updatedAt", "DESC")
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
+
+    return { items, total, page, pageSize };
+  }  
 
   async updateByUserId(
     userId: string,
