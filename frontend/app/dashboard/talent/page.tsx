@@ -8,12 +8,11 @@ import {
   type CandidateCard,
   type TalentSearchResult,
 } from "@/lib/talent";
+import InviteDialog from "@/components/invite-dialog";
 
 function openSince(iso: string | null): string {
   if (!iso) return "";
-  const days = Math.floor(
-    (Date.now() - new Date(iso).getTime()) / 86_400_000,
-  );
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
   if (days < 1) return "Open since today";
   if (days === 1) return "Open since yesterday";
   if (days < 30) return `Open for ${days} days`;
@@ -28,6 +27,8 @@ export default function TalentSearchPage() {
   const [result, setResult] = useState<TalentSearchResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [inviting, setInviting] = useState<CandidateCard | null>(null);
+  const [invited, setInvited] = useState<Set<string>>(new Set());
 
   const [q, setQ] = useState("");
   const [skillsText, setSkillsText] = useState("");
@@ -49,10 +50,7 @@ export default function TalentSearchPage() {
       try {
         const data = await searchCandidates({
           q: q || undefined,
-          skills: skillsText
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean),
+          skills: skillsText.split(",").map((s) => s.trim()).filter(Boolean),
           location: location || undefined,
           minYears: minYears ? Number(minYears) : undefined,
           page: nextPage,
@@ -71,7 +69,6 @@ export default function TalentSearchPage() {
   useEffect(() => {
     if (!user || user.role !== "COMPANY") return;
     void run(1);
-    // Initial load only; later runs are triggered by the form.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -216,7 +213,12 @@ export default function TalentSearchPage() {
         {result && result.items.length > 0 && (
           <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {result.items.map((c) => (
-              <CandidateTile key={c.id} candidate={c} />
+              <CandidateTile
+                key={c.id}
+                candidate={c}
+                invited={invited.has(c.id)}
+                onInvite={() => setInviting(c)}
+              />
             ))}
           </div>
         )}
@@ -243,11 +245,27 @@ export default function TalentSearchPage() {
           </div>
         )}
       </main>
+
+      {inviting && (
+        <InviteDialog
+          candidate={inviting}
+          onClose={() => setInviting(null)}
+          onSent={(id) => setInvited((prev) => new Set(prev).add(id))}
+        />
+      )}
     </>
   );
 }
 
-function CandidateTile({ candidate }: { candidate: CandidateCard }) {
+function CandidateTile({
+  candidate,
+  invited,
+  onInvite,
+}: {
+  candidate: CandidateCard;
+  invited: boolean;
+  onInvite: () => void;
+}) {
   const initials = candidate.fullName
     .split(" ")
     .map((w) => w[0])
@@ -307,21 +325,21 @@ function CandidateTile({ candidate }: { candidate: CandidateCard }) {
         </div>
       )}
 
-      <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-        <span className="flex items-center gap-1.5 text-[11px] text-brand">
+      <div className="mt-4 flex items-center gap-3 text-[11px]">
+        <span className="flex items-center gap-1.5 text-brand">
           <span className="h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_6px_rgba(46,116,181,0.9)]" />
           {openSince(candidate.openToWorkSince)}
         </span>
 
         {links.length > 0 && (
-          <span className="flex gap-3">
+          <span className="ml-auto flex gap-3">
             {links.map((l) => (
               <a
                 key={l.label}
                 href={l.url!}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[11px] text-muted underline underline-offset-4 transition hover:text-brand"
+                className="text-muted underline underline-offset-4 transition hover:text-brand"
               >
                 {l.label}
               </a>
@@ -329,6 +347,18 @@ function CandidateTile({ candidate }: { candidate: CandidateCard }) {
           </span>
         )}
       </div>
+
+      <button
+        onClick={onInvite}
+        disabled={invited}
+        className={
+          invited
+            ? "mt-5 w-full cursor-default rounded-lg border border-success/40 bg-success/10 py-2.5 text-sm font-medium text-success"
+            : "btn-primary mt-5 w-full rounded-lg py-2.5 text-sm font-semibold"
+        }
+      >
+        {invited ? "Invitation sent" : "Invite to a role"}
+      </button>
     </article>
   );
 }

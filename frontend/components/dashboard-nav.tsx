@@ -11,6 +11,7 @@ const candidateNav = [
   { label: "Overview", href: "/dashboard" },
   { label: "Browse jobs", href: "/dashboard/browse" },
   { label: "My applications", href: "/dashboard/applications" },
+  { label: "Invitations", href: "/dashboard/invitations" },
   { label: "Profile", href: "/dashboard/profile" },
 ];
 
