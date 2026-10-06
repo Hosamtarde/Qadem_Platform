@@ -11,6 +11,7 @@ import { CandidatesModule } from './modules/candidates/candidates.module';
 import { MailModule } from './modules/mail/mail.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { APP_GUARD } from '@nestjs/core';
     ApplicationsModule,
     CandidatesModule,
     MailModule,
+    NotificationsModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
