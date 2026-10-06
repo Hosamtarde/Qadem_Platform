@@ -164,6 +164,8 @@ export class ApplicationsService {
     id: string,
     dto: UpdateApplicationStatusDto,
   ) {
+    let affectedCompanyId: string | null = null;
+
     const saved = await this.dataSource.transaction(async (manager) => {
       const repo = manager.getRepository(Application);
 
@@ -201,27 +203,29 @@ export class ApplicationsService {
 
       const result = await repo.save(application);
 
-
       if (statusChanged) {
+        affectedCompanyId = application.job.companyId;
+
         await this.notificationsService.create(
           {
             userId: application.candidateId,
             type: NotificationType.APPLICATION_STATUS_CHANGED,
             title: `Your application for ${application.job.title} is now ${dto.status}`,
             body: `${application.job.company.name} updated your application.`,
-            link: `/dashboard/applications/${application.id}`,
+            link: `/dashboard/applications`,
           },
           manager,
         );
       }
-    
-      const job = await this.jobsService.findById(saved.jobId);
-      void this.responseStatsService
-        .recomputeForCompany(job.companyId)
-        .catch(() => undefined);
 
       return result;
     });
+
+    if (affectedCompanyId) {
+      void this.responseStatsService
+        .recomputeForCompany(affectedCompanyId)
+        .catch(() => undefined);
+    }
 
     const profile = await this.candidatesService
       .findByUserId(saved.candidateId)
@@ -230,6 +234,7 @@ export class ApplicationsService {
     return Object.assign(saved, { candidateProfile: profile });
   }
 
+  
   async countByStatusForCompany(
     userId: string,
   ): Promise<Record<string, number>> {
