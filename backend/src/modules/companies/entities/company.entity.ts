@@ -36,6 +36,18 @@ export class Company {
   @Column({ type: "uuid" })
   userId!: string;
 
+  @Column({ type: "numeric", precision: 5, scale: 2, nullable: true })
+  responseRate!: string | null;
+
+  @Column({ type: "numeric", precision: 6, scale: 2, nullable: true })
+  avgResponseDays!: string | null;
+
+  @Column({ type: "int", default: 0 })
+  responseSampleSize!: number;
+
+  @Column({ type: "timestamp", nullable: true })
+  responseStatsAt!: Date | null;
+
   @CreateDateColumn()
   createdAt!: Date;
 

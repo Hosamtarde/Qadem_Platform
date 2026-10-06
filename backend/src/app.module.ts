@@ -13,6 +13,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { InvitationsModule } from './modules/invitations/invitations.module';
       throttlers: [{ ttl: 60000, limit: 60 }],
       skipIf: () => process.env.NODE_ENV === 'test',
     }),
+    ScheduleModule.forRoot(),
 
     
     TypeOrmModule.forRootAsync({

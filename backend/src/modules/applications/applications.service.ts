@@ -17,6 +17,7 @@ import { ApplicationStatus } from "../../common/enums";
 import { DataSource } from "typeorm";
 import { NotificationsService } from "../notifications/notifications.service";
 import { NotificationType } from "../../common/enums";
+import { ResponseStatsService } from "../companies/response-stats.service";
 
 const ALLOWED_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
   [ApplicationStatus.SUBMITTED]: [
@@ -42,6 +43,7 @@ export class ApplicationsService {
     private readonly candidatesService: CandidatesService,
     private readonly notificationsService: NotificationsService,
     private readonly dataSource: DataSource,
+    private readonly responseStatsService: ResponseStatsService,    
   ) {}
 
   async apply(
@@ -212,6 +214,11 @@ export class ApplicationsService {
           manager,
         );
       }
+    
+      const job = await this.jobsService.findById(saved.jobId);
+      void this.responseStatsService
+        .recomputeForCompany(job.companyId)
+        .catch(() => undefined);
 
       return result;
     });

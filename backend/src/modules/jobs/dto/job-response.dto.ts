@@ -1,10 +1,15 @@
 import { JobType } from "../../../common/enums";
 
+const MIN_SAMPLE = 10;
+
 export class JobCompanySummaryDto {
   id: string;
   name: string;
   location: string | null;
   logoUrl: string | null;
+  responseRate: number | null;
+  avgResponseDays: number | null;
+  responseSampleSize: number;
 }
 
 export class JobResponseDto {
@@ -40,6 +45,9 @@ export class JobResponseDto {
       name: string;
       location: string | null;
       logoUrl: string | null;
+      responseRate?: string | null;
+      avgResponseDays?: string | null;
+      responseSampleSize?: number;
     };
   }) {
     this.id = job.id;
@@ -56,11 +64,24 @@ export class JobResponseDto {
     this.updatedAt = job.updatedAt;
 
     if (job.company) {
+      const sample = job.company.responseSampleSize ?? 0;
+
+      const enough = sample >= MIN_SAMPLE;
+
       this.company = {
         id: job.company.id,
         name: job.company.name,
         location: job.company.location,
         logoUrl: job.company.logoUrl,
+        responseRate:
+          enough && job.company.responseRate != null
+            ? Math.round(Number(job.company.responseRate))
+            : null,
+        avgResponseDays:
+          enough && job.company.avgResponseDays != null
+            ? Math.round(Number(job.company.avgResponseDays) * 10) / 10
+            : null,
+        responseSampleSize: sample,
       };
     }
   }
