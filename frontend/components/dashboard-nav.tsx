@@ -17,6 +17,7 @@ const candidateNav = [
 const companyNav = [
   { label: "Overview", href: "/dashboard" },
   { label: "My postings", href: "/dashboard/jobs" },
+  { label: "Find talent", href: "/dashboard/talent" },
   { label: "Applicants", href: "/dashboard/applicants" },
   { label: "Company profile", href: "/dashboard/company" },
 ];
