@@ -10,6 +10,7 @@ import { CandidateProfile, Job, JOB_TYPE_LABELS } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
 import { ApiRequestError } from "@/lib/api";
 import Logo from "@/components/logo";
+import ResponseBadge from "@/components/response-badge";
 
 export default function JobDetailPage() {
   const params = useParams();
@@ -109,6 +110,14 @@ export default function JobDetailPage() {
             <p className="mt-3 text-muted">
               {job.company?.name ?? "Company"} - {job.location}
             </p>
+
+            <div className="mt-4">
+              <ResponseBadge
+                rate={job.responseRate}
+                avgDays={job.avgResponseDays}
+                sampleSize={job.responseSampleSize}
+              />
+            </div>
 
             <div className="rule my-8" />
 

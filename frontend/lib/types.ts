@@ -29,6 +29,10 @@ export interface Company {
   logoUrl: string | null;
   createdAt: string;
   updatedAt: string;
+  responseRate: number | null;
+  avgResponseDays: number | null;
+  responseSampleSize: number;
+  responseIsPublic: boolean;
 }
 
 export interface CompanySummary {
