@@ -29,6 +29,12 @@ export class CandidateProfile {
   @Column({ type: "text", array: true, default: () => "ARRAY[]::text[]" })
   skills: string[];
 
+  @Column({ type: "boolean", default: false })
+  isOpenToWork: boolean;
+
+  @Column({ type: "timestamp", nullable: true })
+  openToWorkSince: Date | null;
+
   @Column({ type: "int", nullable: true })
   yearsOfExperience: number | null;
 

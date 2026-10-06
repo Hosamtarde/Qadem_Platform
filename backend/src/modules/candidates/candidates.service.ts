@@ -64,6 +64,13 @@ export class CandidatesService {
       delete dto.skills;
     }
 
+    if (
+      dto.isOpenToWork !== undefined &&
+      dto.isOpenToWork !== profile.isOpenToWork
+    ) {
+      profile.openToWorkSince = dto.isOpenToWork ? new Date() : null;
+    }
+
     Object.assign(profile, dto);
     return this.profilesRepository.save(profile);
   }
@@ -121,7 +128,7 @@ export class CandidatesService {
     try {
       await fs.unlink(join(RESUME_DIR, fileName));
     } catch {
-      // File already gone; nothing to clean up.
+      
     }
   }
 }

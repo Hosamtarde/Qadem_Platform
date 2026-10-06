@@ -14,6 +14,7 @@ export class CandidateProfileResponseDto {
   resumeUrl: string | null;
   resumeOriginalName: string | null;
   hasResumeFile: boolean;
+  isOpenToWork: boolean;
   createdAt: Date;
   updatedAt: Date;
 
@@ -31,6 +32,7 @@ export class CandidateProfileResponseDto {
     resumeUrl: string | null;
     resumeFileName: string | null;
     resumeOriginalName: string | null;
+    isOpenToWork: boolean;
     createdAt: Date;
     updatedAt: Date;
     user?: { fullName: string; email: string };
@@ -50,6 +52,7 @@ export class CandidateProfileResponseDto {
     this.resumeUrl = profile.resumeUrl;
     this.resumeOriginalName = profile.resumeOriginalName;
     this.hasResumeFile = Boolean(profile.resumeFileName);
+    this.isOpenToWork = profile.isOpenToWork;
     this.createdAt = profile.createdAt;
     this.updatedAt = profile.updatedAt;
   }
