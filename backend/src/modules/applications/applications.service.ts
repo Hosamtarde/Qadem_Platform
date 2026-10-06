@@ -14,6 +14,9 @@ import { JobsService } from "../jobs/jobs.service";
 import { CompaniesService } from "../companies/companies.service";
 import { CandidatesService } from "../candidates/candidates.service";
 import { ApplicationStatus } from "../../common/enums";
+import { DataSource } from "typeorm";
+import { NotificationsService } from "../notifications/notifications.service";
+import { NotificationType } from "../../common/enums";
 
 const ALLOWED_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
   [ApplicationStatus.SUBMITTED]: [
@@ -37,6 +40,8 @@ export class ApplicationsService {
     private readonly jobsService: JobsService,
     private readonly companiesService: CompaniesService,
     private readonly candidatesService: CandidatesService,
+    private readonly notificationsService: NotificationsService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async apply(
@@ -78,7 +83,18 @@ export class ApplicationsService {
     });
 
     try {
-      return await this.applicationsRepository.save(application);
+      const saved = await this.applicationsRepository.save(application);
+
+      const company = await this.companiesService.findById(job.companyId);
+      await this.notificationsService.create({
+        userId: company.userId,
+        type: NotificationType.NEW_APPLICATION,
+        title: `New application for ${job.title}`,
+        body: "A candidate has applied to one of your openings.",
+        link: `/dashboard/jobs/${jobId}/applications`,
+      });
+
+      return saved;
     } catch (err) {
       if (err instanceof QueryFailedError && this.isUniqueViolation(err)) {
         throw new ConflictException("You have already applied to this opening");
@@ -146,39 +162,64 @@ export class ApplicationsService {
     id: string,
     dto: UpdateApplicationStatusDto,
   ) {
-    const application = await this.applicationsRepository.findOne({
-      where: { id },
-      relations: { candidate: true },
-    });
+    const saved = await this.dataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(Application);
 
-    if (!application) {
-      throw new NotFoundException("Application not found");
-    }
+      const application = await repo.findOne({
+        where: { id },
+        relations: { candidate: true, job: { company: true } },
+      });
 
-    await this.assertJobOwnership(userId, application.jobId);
+      if (!application) {
+        throw new NotFoundException("Application not found");
+      }
 
-    if (dto.status !== application.status) {
-      const allowed = ALLOWED_TRANSITIONS[application.status];
-      if (!allowed.includes(dto.status)) {
-        throw new BadRequestException(
-          `An application marked ${application.status} cannot move to ${dto.status}`,
+      await this.assertJobOwnership(userId, application.jobId);
+
+      let statusChanged = false;
+
+      if (dto.status !== application.status) {
+        const allowed = ALLOWED_TRANSITIONS[application.status];
+        if (!allowed.includes(dto.status)) {
+          throw new BadRequestException(
+            `An application marked ${application.status} cannot move to ${dto.status}`,
+          );
+        }
+        application.status = dto.status;
+        statusChanged = true;
+
+        if (!application.respondedAt) {
+          application.respondedAt = new Date();
+        }
+      }
+
+      if (dto.companyNote !== undefined) {
+        application.companyNote = dto.companyNote;
+      }
+
+      const result = await repo.save(application);
+
+
+      if (statusChanged) {
+        await this.notificationsService.create(
+          {
+            userId: application.candidateId,
+            type: NotificationType.APPLICATION_STATUS_CHANGED,
+            title: `Your application for ${application.job.title} is now ${dto.status}`,
+            body: `${application.job.company.name} updated your application.`,
+            link: `/dashboard/applications/${application.id}`,
+          },
+          manager,
         );
       }
-      application.status = dto.status;
 
-      if (!application.respondedAt) {
-        application.respondedAt = new Date();
-      }
-    }
+      return result;
+    });
 
-    if (dto.companyNote !== undefined) {
-      application.companyNote = dto.companyNote;
-    }
-
-    const saved = await this.applicationsRepository.save(application);
     const profile = await this.candidatesService
       .findByUserId(saved.candidateId)
       .catch(() => null);
+
     return Object.assign(saved, { candidateProfile: profile });
   }
 
