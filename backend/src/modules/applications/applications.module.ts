@@ -6,6 +6,7 @@ import { Application } from "./entities/application.entity";
 import { JobsModule } from "../jobs/jobs.module";
 import { CompaniesModule } from "../companies/companies.module";
 import { CandidatesModule } from "../candidates/candidates.module";
+import { NotificationsModule } from "../notifications/notifications.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { CandidatesModule } from "../candidates/candidates.module";
     JobsModule,
     CompaniesModule,
     CandidatesModule,
+    NotificationsModule,
     
   ],
   controllers: [ApplicationsController],

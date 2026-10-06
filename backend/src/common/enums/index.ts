@@ -15,3 +15,8 @@ export enum ApplicationStatus {
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
 }
+
+export enum NotificationType {
+  APPLICATION_STATUS_CHANGED = 'APPLICATION_STATUS_CHANGED',
+  NEW_APPLICATION = 'NEW_APPLICATION',
+}
