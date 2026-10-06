@@ -17,7 +17,7 @@ export class CompaniesController {
   @Get("me")
   async getMyProfile(@CurrentUser("id") userId: string) {
     const company = await this.companiesService.findByUserId(userId);
-    return new CompanyResponseDto(company);
+    return new CompanyResponseDto(company, { includeUnpublished: true });
   }
 
   @ApiBearerAuth()
@@ -29,7 +29,7 @@ export class CompaniesController {
     @Body() dto: UpdateCompanyDto,
   ) {
     const company = await this.companiesService.updateByUserId(userId, dto);
-    return new CompanyResponseDto(company);
+    return new CompanyResponseDto(company, { includeUnpublished: true });
   }
 
   @Public()
