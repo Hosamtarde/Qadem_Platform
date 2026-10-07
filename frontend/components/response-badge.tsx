@@ -8,14 +8,14 @@ export default function ResponseBadge({
   sampleSize,
   size = "sm",
 }: {
-  rate: number | null;
-  avgDays: number | null;
+  rate: number | null | undefined;
+  avgDays: number | null | undefined;
   sampleSize?: number;
   size?: "sm" | "md";
 }) {
   const t = useT();
 
-  if (rate === null) {
+  if (rate == null) {
     return (
       <span
         className={
@@ -86,7 +86,7 @@ export default function ResponseBadge({
         </span>
       </span>
 
-      {avgDays !== null && (
+      {avgDays != null && (
         <>
           <span className="w-px bg-line/60" />
           <span

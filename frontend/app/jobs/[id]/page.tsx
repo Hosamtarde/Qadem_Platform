@@ -118,9 +118,9 @@ export default function JobDetailPage() {
 
             <div className="mt-4">
               <ResponseBadge
-                rate={job.responseRate}
-                avgDays={job.avgResponseDays}
-                sampleSize={job.responseSampleSize}
+                rate={job.company?.responseRate ?? null}
+                avgDays={job.company?.avgResponseDays ?? null}
+                sampleSize={job.company?.responseSampleSize}
               />
             </div>
 
