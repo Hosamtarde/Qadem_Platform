@@ -93,7 +93,7 @@ export class ApplicationsService {
         type: NotificationType.NEW_APPLICATION,
         title: `New application for ${job.title}`,
         body: "A candidate has applied to one of your openings.",
-        link: `/dashboard/jobs/${jobId}/applications`,
+        link: `/dashboard/applicants`,
       });
 
       return saved;
