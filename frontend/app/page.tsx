@@ -1,31 +1,44 @@
-﻿import Link from "next/link";
+﻿"use client";
+
+import Link from "next/link";
 import Particles from "@/components/particles";
 import Logo from "@/components/logo";
 import CompanyStrip from "@/components/company-strip";
 import BuiltAtWahj from "@/components/built-at-wahj";
+import LanguageToggle from "@/components/language-toggle";
+import { useT } from "@/lib/i18n/context";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
-const cities = [
-  { name: "Ramallah", roles: 5 },
-  { name: "Nablus", roles: 3 },
-  { name: "Hebron", roles: 4 },
-  { name: "Rawabi", roles: 3 },
+const cities: { name: string; key: TranslationKey; roles: number }[] = [
+  { name: "Ramallah", key: "city.ramallah", roles: 5 },
+  { name: "Nablus", key: "city.nablus", roles: 3 },
+  { name: "Hebron", key: "city.hebron", roles: 4 },
+  { name: "Rawabi", key: "city.rawabi", roles: 3 },
 ];
 
-const stages = [
-  { name: "Submitted", badge: "badge-neutral", note: "Reaches the company the moment you send it." },
-  { name: "Reviewing", badge: "badge-warn", note: "They opened it and are going through your details." },
-  { name: "Accepted", badge: "badge-success", note: "You moved forward. They will reach out." },
-  { name: "Rejected", badge: "badge-danger", note: "Not this time. At least you are not guessing." },
+const stages: { name: TranslationKey; badge: string; note: TranslationKey }[] = [
+  { name: "status.submitted", badge: "badge-neutral", note: "home.stage.submitted" },
+  { name: "status.reviewing", badge: "badge-warn", note: "home.stage.reviewing" },
+  { name: "status.accepted", badge: "badge-success", note: "home.stage.accepted" },
+  { name: "status.rejected", badge: "badge-danger", note: "home.stage.rejected" },
 ];
 
-const openings = [
-  { title: "Senior Frontend Engineer", org: "Harri", place: "Ramallah", type: "Full-time", intern: false },
-  { title: "R&D Engineering Intern", org: "ASAL Technologies", place: "Rawabi", type: "Internship", intern: true },
-  { title: "UI/UX Designer", org: "Wahj", place: "Hebron", type: "Part-time", intern: false },
-  { title: "Backend Engineer", org: "Foothill", place: "Nablus", type: "Full-time", intern: false },
+const openings: {
+  title: string;
+  org: string;
+  place: TranslationKey;
+  type: TranslationKey;
+  intern: boolean;
+}[] = [
+  { title: "Senior Frontend Engineer", org: "Harri", place: "city.ramallah", type: "jobType.fullTime", intern: false },
+  { title: "R&D Engineering Intern", org: "ASAL Technologies", place: "city.rawabi", type: "jobType.internship", intern: true },
+  { title: "UI/UX Designer", org: "Wahj", place: "city.hebron", type: "jobType.partTime", intern: false },
+  { title: "Backend Engineer", org: "Foothill", place: "city.nablus", type: "jobType.fullTime", intern: false },
 ];
 
 export default function Home() {
+  const t = useT();
+
   return (
     <div className="relative overflow-hidden">
       <header className="relative z-20 border-b border-line-soft">
@@ -34,23 +47,24 @@ export default function Home() {
             <Logo />
           </Link>
           <nav className="flex items-center gap-1">
+            <LanguageToggle className="me-2" />
             <Link
               href="/jobs"
               className="rounded-lg px-4 py-2 text-sm text-muted transition hover:text-text"
             >
-              Openings
+              {t("nav.openings")}
             </Link>
             <Link
               href="/login"
               className="rounded-lg px-4 py-2 text-sm text-muted transition hover:text-text"
             >
-              Sign in
+              {t("nav.signIn")}
             </Link>
             <Link
               href="/register"
               className="btn-primary ml-2 rounded-lg px-5 py-2 text-sm font-semibold"
             >
-              Get started
+              {t("nav.getStarted")}
             </Link>
           </nav>
         </div>
@@ -60,9 +74,10 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl items-center justify-center gap-2 px-6 py-2.5">
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
           <p className="text-center text-xs text-muted">
-            <span className="font-semibold text-text">Demo data.</span>{" "}
-            Company names, openings and response figures are sample content for
-            demonstration, not real listings.
+            <span className="font-semibold text-text">
+              {t("demo.label")}
+            </span>{" "}
+            {t("demo.body")}
           </p>
         </div>
       </div>
@@ -75,18 +90,19 @@ export default function Home() {
         <div className="relative z-10 mx-auto max-w-3xl px-6 pt-20 text-center sm:pt-24">
           <span className="badge badge-brand">
             <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-            Jobs and internships in Palestine
+            {t("home.badge")}
           </span>
 
           <h1 className="mt-7 font-display text-5xl font-bold leading-[1.06] tracking-tight text-text sm:text-6xl">
-            Find the role.
+            {t("home.title.a")}
             <br />
-            Or find the <span className="text-brand">person</span>.
+            {t("home.title.b")}{" "}
+            <span className="text-brand">{t("home.title.person")}</span>
+            {t("home.title.end")}
           </h1>
 
           <p className="mx-auto mt-6 max-w-lg leading-relaxed text-muted">
-            Companies publish openings. Candidates apply and follow every
-            application from sent to decided.
+            {t("home.lede")}
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -94,13 +110,13 @@ export default function Home() {
               href="/register"
               className="btn-primary rounded-lg px-7 py-3 font-semibold"
             >
-              Create an account
+              {t("common.createAccount")}
             </Link>
             <Link
               href="/jobs"
               className="btn-ghost rounded-lg px-7 py-3 font-semibold"
             >
-              Browse openings
+              {t("common.browseOpenings")}
             </Link>
           </div>
         </div>
@@ -115,11 +131,10 @@ export default function Home() {
           <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
             <div>
               <h2 className="font-display text-3xl font-bold leading-tight text-text">
-                Hiring across Palestine
+                {t("home.cities.title")}
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-muted">
-                Companies from four cities publish here. Browse without an
-                account, and create one when you are ready to apply.
+                {t("home.cities.body")}
               </p>
 
               <div className="mt-8 grid grid-cols-2 gap-3">
@@ -131,7 +146,7 @@ export default function Home() {
                   >
                     <div className="flex items-baseline justify-between">
                       <span className="text-sm font-semibold text-text">
-                        {city.name}
+                        {t(city.key)}
                       </span>
                       <span className="text-sm font-semibold text-brand">
                         {city.roles}
@@ -154,7 +169,7 @@ export default function Home() {
                       {job.title}
                     </p>
                     <p className="mt-1 text-xs text-muted">
-                      {job.org} - {job.place}
+                      {job.org} - {t(job.place)}
                     </p>
                   </div>
                   <span
@@ -162,7 +177,7 @@ export default function Home() {
                       job.intern ? "badge badge-brand" : "badge badge-neutral"
                     }
                   >
-                    {job.type}
+                    {t(job.type)}
                   </span>
                 </Link>
               ))}
@@ -171,7 +186,7 @@ export default function Home() {
                 href="/jobs"
                 className="block pt-2 text-sm font-semibold text-brand underline underline-offset-8 transition hover:text-brand-soft"
               >
-                See all openings
+                {t("home.seeAll")}
               </Link>
             </div>
           </div>
@@ -179,18 +194,18 @@ export default function Home() {
 
         <section className="border-b border-line-soft py-16">
           <h2 className="font-display text-3xl font-bold leading-tight text-text">
-            Every application carries a status
+            {t("home.stages.title")}
           </h2>
           <p className="mt-3 max-w-lg text-sm text-muted">
-            Colour and label together, so the state is readable at a glance.
+            {t("home.stages.body")}
           </p>
 
           <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
             {stages.map((stage) => (
               <div key={stage.name} className="bg-panel p-6">
-                <span className={`badge ${stage.badge}`}>{stage.name}</span>
+                <span className={`badge ${stage.badge}`}>{t(stage.name)}</span>
                 <p className="mt-4 text-sm leading-relaxed text-muted">
-                  {stage.note}
+                  {t(stage.note)}
                 </p>
               </div>
             ))}
@@ -202,17 +217,16 @@ export default function Home() {
             <div className="glow" />
             <div className="relative z-10">
               <h2 className="font-display text-3xl font-bold text-text">
-                Pick your side
+                {t("home.pick.title")}
               </h2>
               <p className="mx-auto mt-3 max-w-sm text-sm text-muted">
-                Candidate or company. The platform adapts to whichever you
-                choose.
+                {t("home.pick.body")}
               </p>
               <Link
                 href="/register"
                 className="btn-primary mt-8 inline-block rounded-lg px-8 py-3 font-semibold"
               >
-                Create an account
+                {t("common.createAccount")}
               </Link>
             </div>
           </div>
@@ -227,7 +241,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-br from-brand/5 via-transparent to-brand-soft/5" />
             <div className="relative z-10">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand">
-                Designed &amp; Built By
+                {t("credit.label")}
               </p>
               <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
                 <span className="font-display text-lg font-bold text-text">

@@ -12,10 +12,10 @@ import {
   Application,
   ApplicationStatus,
   Job,
-  JOB_TYPE_LABELS,
   STATUS_BADGES,
-  STATUS_LABELS,
 } from "@/lib/types";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, jobTypeKey, statusKey } from "@/lib/i18n/dictionaries";
 
 const NEXT_STATES: Record<ApplicationStatus, ApplicationStatus[]> = {
   SUBMITTED: ["REVIEWING", "ACCEPTED", "REJECTED"],
@@ -36,6 +36,7 @@ function formatDate(value: string) {
 }
 
 export default function ApplicantsPage() {
+  const t = useT();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -64,7 +65,7 @@ export default function ApplicantsPage() {
         setJobs(data);
         if (data.length) setSelectedJobId(data[0].id);
       })
-      .catch(() => setError("Could not load your postings."))
+      .catch(() => setError(t("post.loadError")))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -74,7 +75,7 @@ export default function ApplicantsPage() {
     setError("");
     listJobApplications(selectedJobId)
       .then(setApplications)
-      .catch(() => setError("Could not load applicants for this role."))
+      .catch(() => setError(t("appl.loadError")))
       .finally(() => setLoadingApps(false));
   }, [selectedJobId]);
 
@@ -116,7 +117,7 @@ export default function ApplicantsPage() {
       setError(
         err instanceof ApiRequestError
           ? err.messages.join(", ")
-          : "Could not update this application.",
+          : t("appl.updateError"),
       );
     } finally {
       setBusyId(null);
@@ -135,7 +136,7 @@ export default function ApplicantsPage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading</p>
+        <p className="text-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -145,28 +146,26 @@ export default function ApplicantsPage() {
   return (
     <>
       <header className="border-b border-line px-6 py-5 lg:px-10">
-        <p className="text-sm text-muted">Company workspace</p>
+        <p className="text-sm text-muted">{t("dash.companySpace")}</p>
         <h1 className="mt-1 font-display text-2xl font-bold text-text">
-          Applicants
+          {t("nav.applicants")}
         </h1>
       </header>
 
       <main className="px-6 py-8 lg:px-10">
         <p className="text-sm text-muted">
-          Review who applied and move them through your pipeline.
+          {t("appl.intro")}
         </p>
 
         {jobs.length === 0 && (
           <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
-            <p className="font-semibold text-text">No postings yet</p>
-            <p className="mt-2 text-sm text-muted">
-              Publish a role and applicants will show up here.
-            </p>
+            <p className="font-semibold text-text">{t("appl.noPostings")}</p>
+            <p className="mt-2 text-sm text-muted">{t("appl.noPostingsBody")}</p>
             <Link
               href="/dashboard/jobs"
               className="btn-primary mt-7 inline-block rounded-lg px-6 py-2.5 text-sm font-semibold"
             >
-              Publish a role
+              {t("post.publishRole")}
             </Link>
           </div>
         )}
@@ -174,7 +173,7 @@ export default function ApplicantsPage() {
         {jobs.length > 0 && (
           <>
             <div className="mt-6">
-              <label className="text-sm text-muted">Posting</label>
+              <label className="text-sm text-muted">{t("appl.posting")}</label>
               <select
                 value={selectedJobId ?? ""}
                 onChange={(e) => {
@@ -186,13 +185,14 @@ export default function ApplicantsPage() {
               >
                 {jobs.map((job) => (
                   <option key={job.id} value={job.id}>
-                    {job.title} - {JOB_TYPE_LABELS[job.type]} - {job.location}
+                    {job.title} - {t(jobTypeKey(job.type))} -{" "}
+                    {t(cityKey(job.location))}
                   </option>
                 ))}
               </select>
               {selectedJob && !selectedJob.isActive && (
                 <p className="mt-2 text-xs text-warn">
-                  This posting is paused. It no longer accepts new applications.
+                  {t("appl.paused")}
                 </p>
               )}
             </div>
@@ -203,7 +203,7 @@ export default function ApplicantsPage() {
               ).map((s) => (
                 <div key={s} className="bg-panel p-5">
                   <span className={`badge ${STATUS_BADGES[s]}`}>
-                    {STATUS_LABELS[s]}
+                    {t(statusKey(s))}
                   </span>
                   <p className="mt-3 font-display text-2xl font-bold text-text">
                     {counts[s]}
@@ -234,28 +234,26 @@ export default function ApplicantsPage() {
                       : "rounded-md px-4 py-2 text-xs text-muted transition hover:text-text"
                   }
                 >
-                  {f === "ALL" ? "All" : STATUS_LABELS[f]}
+                  {f === "ALL" ? t("common.all") : t(statusKey(f))}
                 </button>
               ))}
             </div>
 
             {loadingApps && (
-              <p className="mt-6 text-sm text-muted">Loading applicants</p>
+              <p className="mt-6 text-sm text-muted">{t("appl.loading")}</p>
             )}
 
             {!loadingApps && applications.length === 0 && (
               <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
-                <p className="font-semibold text-text">No applicants yet</p>
-                <p className="mt-2 text-sm text-muted">
-                  Nobody has applied to this role so far.
-                </p>
+                <p className="font-semibold text-text">{t("appl.emptyTitle")}</p>
+                <p className="mt-2 text-sm text-muted">{t("appl.emptyBody")}</p>
               </div>
             )}
 
             {!loadingApps && applications.length > 0 && visible.length === 0 && (
               <div className="surface mt-6 rounded-xl px-8 py-14 text-center">
                 <p className="text-sm text-muted">
-                  No applicants with this status.
+                  {t("appl.noneWithStatus")}
                 </p>
               </div>
             )}
@@ -281,11 +279,11 @@ export default function ApplicantsPage() {
                         </span>
                         <div className="min-w-0">
                           <p className="truncate font-semibold text-text">
-                            {c?.fullName ?? "Candidate"}
+                            {c?.fullName ?? t("role.candidate")}
                           </p>
                           <p className="mt-0.5 truncate text-xs text-muted">
                             {c?.headline ?? c?.email}
-                            {c?.location ? ` - ${c.location}` : ""}
+                            {c?.location ? ` - ${t(cityKey(c.location))}` : ""}
                           </p>
                         </div>
                       </div>
@@ -295,7 +293,7 @@ export default function ApplicantsPage() {
                           {formatDate(app.createdAt)}
                         </span>
                         <span className={`badge ${STATUS_BADGES[app.status]}`}>
-                          {STATUS_LABELS[app.status]}
+                          {t(statusKey(app.status))}
                         </span>
                       </div>
                     </button>
@@ -305,16 +303,16 @@ export default function ApplicantsPage() {
                         <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
                           <div>
                             <h3 className="text-sm font-semibold text-brand">
-                              Cover letter
+                              {t("appl.coverLetter")}
                             </h3>
                             <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">
-                              {app.coverLetter ?? "No note was included."}
+                              {app.coverLetter ?? t("appl.noNote")}
                             </p>
 
                             {c.skills.length > 0 && (
                               <>
                                 <h3 className="mt-7 text-sm font-semibold text-brand">
-                                  Skills
+                                  {t("talent.skills")}
                                 </h3>
                                 <div className="mt-3 flex flex-wrap gap-2">
                                   {c.skills.map((s) => (
@@ -341,17 +339,19 @@ export default function ApplicantsPage() {
                                 </div>
                                 {c.phone && (
                                   <div>
-                                    <dt className="text-xs text-muted">Phone</dt>
+                                    <dt className="text-xs text-muted">{t("appl.phone")}</dt>
                                     <dd className="text-text">{c.phone}</dd>
                                   </div>
                                 )}
                                 {c.yearsOfExperience != null && (
                                   <div>
                                     <dt className="text-xs text-muted">
-                                      Experience
+                                      {t("appl.experience")}
                                     </dt>
                                     <dd className="text-text">
-                                      {c.yearsOfExperience} years
+                                      {t("talent.yearMany", {
+                                        count: c.yearsOfExperience,
+                                      })}
                                     </dd>
                                   </div>
                                 )}
@@ -372,7 +372,7 @@ export default function ApplicantsPage() {
 
                             <div className="rounded-lg border border-line bg-panel-2 p-5">
                               <h3 className="text-sm font-semibold text-text">
-                                Resume
+                                {t("appl.resume")}
                               </h3>
                               <div className="mt-3 flex flex-wrap gap-2">
                                 {c.hasResumeFile && c.profileId ? (
@@ -385,7 +385,7 @@ export default function ApplicantsPage() {
                                     }
                                     className="btn-ghost rounded-lg px-4 py-2 text-xs"
                                   >
-                                    Download file
+                                    {t("appl.download")}
                                   </button>
                                 ) : null}
                                 {c.resumeUrl ? (
@@ -393,7 +393,7 @@ export default function ApplicantsPage() {
                                 ) : null}
                                 {!c.hasResumeFile && !c.resumeUrl ? (
                                   <p className="text-sm text-muted/60">
-                                    No resume provided
+                                    {t("appl.noResume")}
                                   </p>
                                 ) : null}
                               </div>
@@ -404,13 +404,13 @@ export default function ApplicantsPage() {
                         <div className="rule my-6" />
 
                         <h3 className="text-sm font-semibold text-brand">
-                          Your note
+                          {t("appl.yourNote")}
                         </h3>
                         <textarea
                           rows={2}
                           value={noteDraft}
                           onChange={(e) => setNoteDraft(e.target.value)}
-                          placeholder="Visible to the candidate."
+                          placeholder={t("appl.notePlaceholder")}
                           className="mt-3 w-full rounded-lg border border-line bg-panel px-4 py-3 text-sm text-text placeholder:text-muted/50 outline-none transition focus:border-brand"
                         />
 
@@ -430,21 +430,22 @@ export default function ApplicantsPage() {
                                 }
                               >
                                 {busyId === app.id
-                                  ? "Saving"
-                                  : `Mark ${STATUS_LABELS[s].toLowerCase()}`}
+                                  ? t("common.saving")
+                                  : t("appl.markAs", { status: t(statusKey(s)) })}
                               </button>
                             ))}
                           </div>
                         ) : (
                           <p className="mt-4 text-sm text-muted">
-                            This application is closed. Its status cannot change
-                            again.
+                            {t("appl.closed")}
                           </p>
                         )}
 
                         {app.respondedAt && (
                           <p className="mt-4 text-xs text-muted/60">
-                            First response {formatDate(app.respondedAt)}
+                            {t("apps.respondedOn", {
+                              date: formatDate(app.respondedAt),
+                            })}
                           </p>
                         )}
                       </div>

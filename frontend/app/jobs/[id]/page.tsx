@@ -6,13 +6,17 @@ import { useParams } from "next/navigation";
 import { getJob } from "@/lib/jobs";
 import { applyToJob, hasApplied } from "@/lib/applications";
 import { getMyProfile } from "@/lib/candidates";
-import { CandidateProfile, Job, JOB_TYPE_LABELS } from "@/lib/types";
+import { CandidateProfile, Job } from "@/lib/types";
 import { useAuth } from "@/lib/auth-context";
 import { ApiRequestError } from "@/lib/api";
 import Logo from "@/components/logo";
+import LanguageToggle from "@/components/language-toggle";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, jobTypeKey } from "@/lib/i18n/dictionaries";
 import ResponseBadge from "@/components/response-badge";
 
 export default function JobDetailPage() {
+  const t = useT();
   const params = useParams();
   const id = String(params.id);
   const { user, loading: authLoading } = useAuth();
@@ -31,7 +35,7 @@ export default function JobDetailPage() {
   useEffect(() => {
     getJob(id)
       .then(setJob)
-      .catch(() => setError("This opening is no longer available."))
+      .catch(() => setError(t("job.gone")))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -59,7 +63,7 @@ export default function JobDetailPage() {
         setApplyError(err.messages.join(", "));
         if (err.statusCode === 409) setApplied(true);
       } else {
-        setApplyError("Could not send your application.");
+        setApplyError(t("job.applyError"));
       }
     } finally {
       setSubmitting(false);
@@ -78,8 +82,9 @@ export default function JobDetailPage() {
           <Link href="/">
             <Logo />
           </Link>
+          <LanguageToggle className="me-2" />
           <Link href="/jobs" className="btn-ghost rounded-lg px-4 py-2 text-sm">
-            All openings
+            {t("job.allOpenings")}
           </Link>
         </div>
       </header>
@@ -87,7 +92,7 @@ export default function JobDetailPage() {
       <div className="glow" />
 
       <main className="relative z-10 mx-auto max-w-3xl px-6 py-10">
-        {loading && <p className="text-muted">Loading</p>}
+        {loading && <p className="text-muted">{t("common.loading")}</p>}
 
         {error && (
           <p className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
@@ -100,7 +105,7 @@ export default function JobDetailPage() {
             <span
               className={isIntern ? "badge badge-brand" : "badge badge-neutral"}
             >
-              {JOB_TYPE_LABELS[job.type]}
+              {t(jobTypeKey(job.type))}
             </span>
 
             <h1 className="mt-5 font-display text-3xl font-bold leading-tight text-text sm:text-4xl">
@@ -108,7 +113,7 @@ export default function JobDetailPage() {
             </h1>
 
             <p className="mt-3 text-muted">
-              {job.company?.name ?? "Company"} - {job.location}
+              {job.company?.name ?? t("role.company")} - {t(cityKey(job.location))}
             </p>
 
             <div className="mt-4">
@@ -123,7 +128,7 @@ export default function JobDetailPage() {
 
             <section className="surface rounded-xl p-8">
               <h2 className="text-sm font-semibold text-brand">
-                About this role
+                {t("job.about")}
               </h2>
               <p className="mt-4 whitespace-pre-line leading-relaxed text-muted">
                 {job.description}
@@ -132,7 +137,7 @@ export default function JobDetailPage() {
               {job.requirements ? (
                 <>
                   <h2 className="mt-8 text-sm font-semibold text-brand">
-                    Requirements
+                    {t("job.requirements")}
                   </h2>
                   <p className="mt-4 whitespace-pre-line leading-relaxed text-muted">
                     {job.requirements}
@@ -143,28 +148,30 @@ export default function JobDetailPage() {
 
             <div className="mt-4 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
               <div className="bg-panel p-6">
-                <p className="text-sm text-muted">Type</p>
+                <p className="text-sm text-muted">{t("job.type")}</p>
                 <p className="mt-2 font-semibold text-text">
-                  {JOB_TYPE_LABELS[job.type]}
+                  {t(jobTypeKey(job.type))}
                 </p>
               </div>
               <div className="bg-panel p-6">
-                <p className="text-sm text-muted">Location</p>
-                <p className="mt-2 font-semibold text-text">{job.location}</p>
+                <p className="text-sm text-muted">{t("job.location")}</p>
+                <p className="mt-2 font-semibold text-text">
+                  {t(cityKey(job.location))}
+                </p>
               </div>
               <div className="bg-panel p-6">
-                <p className="text-sm text-muted">Salary</p>
+                <p className="text-sm text-muted">{t("job.salary")}</p>
                 <p className="mt-2 font-semibold text-text">
                   {job.salaryMin || job.salaryMax
                     ? `${job.salaryMin ?? "?"} - ${job.salaryMax ?? "?"}`
-                    : "Not disclosed"}
+                    : t("job.salaryHidden")}
                 </p>
               </div>
             </div>
 
             <div className="mt-8">
               {authLoading && (
-                <p className="text-sm text-muted">Checking your session</p>
+                <p className="text-sm text-muted">{t("job.checkingSession")}</p>
               )}
 
               {!authLoading && !user && (
@@ -172,13 +179,13 @@ export default function JobDetailPage() {
                   href="/login"
                   className="btn-primary block rounded-lg py-3.5 text-center font-semibold"
                 >
-                  Sign in to apply
+                  {t("job.signInToApply")}
                 </Link>
               )}
 
               {!authLoading && user?.role === "COMPANY" && (
                 <p className="rounded-lg border border-line px-5 py-3.5 text-center text-sm text-muted">
-                  You are signed in as a company. Only candidates can apply.
+                  {t("job.companyCannotApply")}
                 </p>
               )}
 
@@ -187,17 +194,17 @@ export default function JobDetailPage() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="font-semibold text-text">
-                        Application sent
+                        {t("job.applicationSent")}
                       </p>
                       <p className="mt-1 text-sm text-muted">
-                        You can follow its status from your applications.
+                        {t("job.followStatus")}
                       </p>
                     </div>
                     <Link
                       href="/dashboard/applications"
                       className="btn-ghost rounded-lg px-5 py-2.5 text-sm font-semibold"
                     >
-                      View applications
+                      {t("job.viewApplications")}
                     </Link>
                   </div>
                 </div>
@@ -208,42 +215,41 @@ export default function JobDetailPage() {
                   onClick={() => setFormOpen(true)}
                   className="btn-primary w-full rounded-lg py-3.5 font-semibold"
                 >
-                  Apply for this role
+                  {t("job.apply")}
                 </button>
               )}
 
               {!authLoading && isCandidate && !applied && formOpen && (
                 <form onSubmit={handleApply} className="surface rounded-xl p-7">
                   <h2 className="text-sm font-semibold text-brand">
-                    Your application
+                    {t("job.yourApplication")}
                   </h2>
                   <p className="mt-2 text-sm text-muted">
-                    A short note helps, but it is optional.
+                    {t("job.noteOptional")}
                   </p>
 
                   {hasResume ? (
                     <div className="mt-5 rounded-lg border border-line bg-panel-2 px-4 py-3">
                       <p className="text-xs text-muted">
-                        Sending as{" "}
+                        {t("job.sendingAs")}{" "}
                         <span className="text-text">{profile?.fullName}</span>
                         {profile?.headline ? ` - ${profile.headline}` : ""}
                         {profile?.skills.length
-                          ? ` - ${profile.skills.length} skills`
+                          ? ` - ${t("job.skillCount", { count: profile.skills.length })}`
                           : ""}
-                        {" - resume attached. "}
-                        <Link href="/dashboard/profile" className="text-brand underline underline-offset-4">Review profile</Link>
+                        {` - ${t("job.resumeAttached")} `}
+                        <Link href="/dashboard/profile" className="text-brand underline underline-offset-4">{t("job.reviewProfile")}</Link>
                       </p>
                     </div>
                   ) : (
                     <div className="mt-5 rounded-lg border border-warn/40 bg-warn/10 px-4 py-3">
                       <p className="text-sm font-medium text-warn">
-                        No resume on your profile
+                        {t("job.noResume")}
                       </p>
                       <p className="mt-1 text-xs text-muted">
-                        Companies rarely review an application without one. Add
-                        a file or a link, then come back.
+                        {t("job.noResumeBody")}
                       </p>
-                      <Link href="/dashboard/profile" className="btn-primary mt-3 inline-block rounded-lg px-4 py-2 text-xs font-semibold">Add your resume</Link>
+                      <Link href="/dashboard/profile" className="btn-primary mt-3 inline-block rounded-lg px-4 py-2 text-xs font-semibold">{t("job.addResume")}</Link>
                     </div>
                   )}
 
@@ -251,14 +257,13 @@ export default function JobDetailPage() {
                     rows={6}
                     value={coverLetter}
                     onChange={(e) => setCoverLetter(e.target.value)}
-                    placeholder="Why you are a fit for this role."
+                    placeholder={t("job.notePlaceholder")}
                     className="mt-5 w-full rounded-lg border border-line bg-panel px-4 py-3 text-text placeholder:text-muted/50 outline-none transition focus:border-brand"
                   />
 
                   {noteTooShort && (
                     <p className="mt-2 text-xs text-warn">
-                      A note should be at least 20 characters, or leave it
-                      empty.
+                      {t("job.noteTooShort")}
                     </p>
                   )}
 
@@ -274,14 +279,14 @@ export default function JobDetailPage() {
                       disabled={submitting || noteTooShort || !hasResume}
                       className="btn-primary rounded-lg px-7 py-3 font-semibold disabled:opacity-50"
                     >
-                      {submitting ? "Sending" : "Send application"}
+                      {submitting ? t("job.sending") : t("job.sendApplication")}
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormOpen(false)}
                       className="btn-ghost rounded-lg px-7 py-3 font-semibold"
                     >
-                      Cancel
+                      {t("common.cancel")}
                     </button>
                   </div>
                 </form>

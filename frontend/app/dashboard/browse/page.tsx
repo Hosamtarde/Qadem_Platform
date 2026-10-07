@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { listJobs } from "@/lib/jobs";
 import ResponseBadge from "@/components/response-badge";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, jobTypeKey } from "@/lib/i18n/dictionaries";
 import {
   Job,
   JobType,
   JobFilters,
   PaginationMeta,
-  JOB_TYPE_LABELS,
 } from "@/lib/types";
 
 const TYPES: (JobType | "ALL")[] = [
@@ -21,9 +22,9 @@ const TYPES: (JobType | "ALL")[] = [
 ];
 const CITIES = ["Ramallah", "Nablus", "Hebron", "Rawabi"];
 const SORTS: { key: "newest" | "oldest" | "salary"; label: string }[] = [
-  { key: "newest", label: "Newest" },
-  { key: "oldest", label: "Oldest" },
-  { key: "salary", label: "Highest salary" },
+  { key: "newest", label: "sort.newest" as const },
+  { key: "oldest", label: "sort.oldest" as const },
+  { key: "salary", label: "sort.salary" as const },
 ];
 
 function initials(name: string) {
@@ -31,6 +32,7 @@ function initials(name: string) {
 }
 
 function BrowseView() {
+  const tr = useT();
   const router = useRouter();
   const params = useSearchParams();
 
@@ -79,7 +81,7 @@ function BrowseView() {
         setJobs(res.data);
         setMeta(res.meta);
       })
-      .catch(() => setError("Could not load openings. Try again shortly."))
+      .catch(() => setError(tr("jobs.loadError")))
       .finally(() => setLoading(false));
   }, [search, type, location, sortBy, page]);
 
@@ -88,18 +90,20 @@ function BrowseView() {
   return (
     <>
       <header className="border-b border-line px-6 py-5 lg:px-10">
-        <p className="text-sm text-muted">Browse</p>
+        <p className="text-sm text-muted">{tr("nav.browse")}</p>
         <h1 className="mt-1 font-display text-2xl font-bold text-text">
-          Open positions
+          {tr("jobs.title")}
         </h1>
       </header>
 
       <main className="px-6 py-8 lg:px-10">
         <p className="text-sm text-muted">
           {loading
-            ? "Searching"
+            ? tr("common.searching")
             : meta
-              ? `${meta.total} ${meta.total === 1 ? "role" : "roles"} found`
+              ? tr(meta.total === 1 ? "jobs.countOne" : "jobs.countMany", {
+                  count: meta.total,
+                })
               : ""}
         </p>
 
@@ -114,7 +118,7 @@ function BrowseView() {
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by title or description"
+            placeholder={tr("jobs.searchPlaceholder")}
             className="flex-1 rounded-lg border border-line bg-panel px-4 py-3 text-text placeholder:text-muted/50 outline-none transition focus:border-brand"
           />
           <button
@@ -139,7 +143,7 @@ function BrowseView() {
                       : "rounded-md px-4 py-2 text-xs text-muted transition hover:text-text"
                   }
                 >
-                  {t === "ALL" ? "All types" : JOB_TYPE_LABELS[t as JobType]}
+                  {t === "ALL" ? tr("jobs.allTypes") : tr(jobTypeKey(t as JobType))}
                 </button>
               );
             })}
@@ -156,7 +160,7 @@ function BrowseView() {
                     : "btn-ghost rounded-lg px-4 py-2 text-xs"
                 }
               >
-                {c}
+                {tr(cityKey(c))}
               </button>
             ))}
           </div>
@@ -168,7 +172,7 @@ function BrowseView() {
           >
             {SORTS.map((s) => (
               <option key={s.key} value={s.key}>
-                {s.label}
+                {tr(s.label)}
               </option>
             ))}
           </select>
@@ -178,7 +182,7 @@ function BrowseView() {
               onClick={() => router.push("/dashboard/browse")}
               className="px-3 py-2 text-xs text-muted underline underline-offset-4 transition hover:text-text"
             >
-              Clear filters
+              {tr("jobs.clearFilters")}
             </button>
           )}
         </div>
@@ -191,9 +195,9 @@ function BrowseView() {
 
         {!loading && !error && jobs.length === 0 && (
           <div className="surface mt-6 rounded-xl px-8 py-20 text-center">
-            <p className="font-semibold text-text">No matches</p>
+            <p className="font-semibold text-text">{tr("jobs.noMatches")}</p>
             <p className="mt-2 text-sm text-muted">
-              Try a different search term or clear some filters.
+              {tr("jobs.noMatchesBody")}
             </p>
           </div>
         )}
@@ -201,7 +205,7 @@ function BrowseView() {
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {jobs.map((job) => {
             const isIntern = job.type === "INTERNSHIP";
-            const org = job.company?.name ?? "Company";
+            const org = job.company?.name ?? tr("role.company");
             return (
               <Link
                 key={job.id}
@@ -247,7 +251,7 @@ function BrowseView() {
                       isIntern ? "badge badge-brand" : "badge badge-neutral"
                     }
                   >
-                    {JOB_TYPE_LABELS[job.type]}
+                    {tr(jobTypeKey(job.type))}
                   </span>
                   {(job.salaryMin || job.salaryMax) && (
                     <span className="text-xs font-semibold text-text">

@@ -215,3 +215,22 @@
   }
   .marquee { animation: none; }
 }
+
+@layer base {
+  /* Arabic reads better in a face built for it, and the display face has no
+     Arabic glyphs at all, so both roles switch together. */
+  html[lang="ar"] body,
+  html[lang="ar"] .font-display {
+    font-family: var(--font-arabic), var(--font-sans), sans-serif;
+  }
+
+  html[lang="ar"] {
+    letter-spacing: 0;
+  }
+
+  html[lang="ar"] .tracking-tight,
+  html[lang="ar"] .tracking-\[0\.2em\],
+  html[lang="ar"] .tracking-wide {
+    letter-spacing: 0;
+  }
+}

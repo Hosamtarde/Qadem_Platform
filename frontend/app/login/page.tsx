@@ -7,8 +7,11 @@ import { ApiRequestError } from "@/lib/api";
 import { resendVerification } from "@/lib/auth";
 import Particles from "@/components/particles";
 import Logo from "@/components/logo";
+import LanguageToggle from "@/components/language-toggle";
+import { useT } from "@/lib/i18n/context";
 
 export default function LoginPage() {
+  const t = useT();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +40,7 @@ export default function LoginPage() {
           setError(err.messages.join(", "));
         }
       } else {
-        setError("Could not reach the server. Check your connection.");
+        setError(t("auth.networkError"));
       }
     } finally {
       setSubmitting(false);
@@ -53,9 +56,9 @@ export default function LoginPage() {
     } catch (err) {
       setResendState("idle");
       if (err instanceof ApiRequestError && err.statusCode === 429) {
-        setResendError("Too many attempts. Try again later.");
+        setResendError(t("auth.tooManyAttempts"));
       } else {
-        setResendError("Could not send the email. Try again.");
+        setResendError(t("auth.resendFailed"));
       }
     }
   }
@@ -76,17 +79,17 @@ export default function LoginPage() {
 
         <div className="relative z-10 max-w-md">
           <h2 className="font-display text-4xl font-bold leading-tight text-text">
-            Openings, applicants and decisions in one place.
+            {t("auth.asideTitle")}
           </h2>
           <div className="rule my-8" />
           <dl className="space-y-4 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-muted">Candidates</dt>
-              <dd className="text-text">Apply once, track the status</dd>
+              <dt className="text-muted">{t("auth.asideCandidates")}</dt>
+              <dd className="text-text">{t("auth.asideCandidatesBody")}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-muted">Companies</dt>
-              <dd className="text-text">Publish roles, review applicants</dd>
+              <dt className="text-muted">{t("auth.asideCompanies")}</dt>
+              <dd className="text-text">{t("auth.asideCompaniesBody")}</dd>
             </div>
           </dl>
         </div>
@@ -105,15 +108,15 @@ export default function LoginPage() {
           </Link>
 
           <h1 className="mt-8 font-display text-3xl font-bold text-text lg:mt-0">
-            Sign in
+            {t("auth.signInTitle")}
           </h1>
           <p className="mt-2 text-sm text-muted">
-            Use the email you registered with.
+            {t("auth.signInSubtitle")}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-9 space-y-5">
             <div>
-              <label className="text-sm text-muted">Email</label>
+              <label className="text-sm text-muted">{t("auth.email")}</label>
               <input
                 type="email"
                 required
@@ -125,14 +128,14 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="text-sm text-muted">Password</label>
+              <label className="text-sm text-muted">{t("auth.password")}</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={field}
-                placeholder="Your password"
+                placeholder={t("auth.passwordPlaceholder")}
               />
             </div>
 
@@ -145,16 +148,15 @@ export default function LoginPage() {
             {unverified && (
               <div className="rounded-lg border border-line bg-panel px-4 py-4 text-sm">
                 <p className="font-medium text-text">
-                  This account is not verified yet
+                  {t("auth.notVerified")}
                 </p>
                 <p className="mt-1.5 leading-relaxed text-muted">
-                  Open the link we emailed you to activate the account, then
-                  sign in.
+                  {t("auth.notVerifiedBody")}
                 </p>
 
                 {resendState === "sent" ? (
                   <p className="mt-3 text-brand">
-                    A new link is on its way to {email}.
+                    {t("auth.linkSent", { email })}
                   </p>
                 ) : (
                   <button
@@ -164,8 +166,8 @@ export default function LoginPage() {
                     className="mt-3 font-medium text-brand underline underline-offset-4 transition hover:text-brand-soft disabled:opacity-50"
                   >
                     {resendState === "sending"
-                      ? "Sending"
-                      : "Send the link again"}
+                      ? t("auth.sending")
+                      : t("auth.resendLink")}
                   </button>
                 )}
 
@@ -180,17 +182,17 @@ export default function LoginPage() {
               disabled={submitting}
               className="btn-primary w-full rounded-lg py-3 font-semibold disabled:opacity-50"
             >
-              {submitting ? "Signing in" : "Sign in"}
+              {submitting ? t("auth.signingIn") : t("auth.signIn")}
             </button>
           </form>
 
           <p className="mt-7 text-sm text-muted">
-            No account yet?{" "}
+            {t("auth.noAccount")}{" "}
             <Link
               href="/register"
               className="font-medium text-brand underline underline-offset-4 transition hover:text-brand-soft"
             >
-              Create one
+              {t("auth.createOne")}
             </Link>
           </p>
         </div>

@@ -4,10 +4,12 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { verifyEmail } from '@/lib/auth';
+import { useT } from '@/lib/i18n/context';
 
 type State = 'loading' | 'success' | 'error';
 
 function VerifyEmailContent() {
+  const t = useT();
   const params = useSearchParams();
   const token = params.get('token');
 
@@ -21,7 +23,7 @@ function VerifyEmailContent() {
 
     if (!token) {
       setState('error');
-      setMessage('No verification token was provided.');
+      setMessage(t('verify.noToken'));
       return;
     }
 
@@ -32,26 +34,26 @@ function VerifyEmailContent() {
       })
       .catch((err) => {
         setState('error');
-        setMessage(err.message ?? 'Verification failed.');
+        setMessage(err.message ?? t('verify.failed'));
       });
-  }, [token]);
+  }, [token, t]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md rounded-lg border p-8 text-center">
         {state === 'loading' && (
-          <p className="text-gray-600">Verifying your account…</p>
+          <p className="text-muted">{t('verify.working')}</p>
         )}
 
         {state === 'success' && (
           <>
-            <h1 className="mb-3 text-2xl font-semibold">Account verified</h1>
+            <h1 className="mb-3 text-2xl font-semibold">{t('verify.successTitle')}</h1>
             <p className="mb-6 text-gray-600">{message}</p>
             <Link
               href="/login"
               className="inline-block rounded-md bg-blue-600 px-6 py-2 text-white"
             >
-              Go to login
+              {t('verify.goToLogin')}
             </Link>
           </>
         )}
@@ -59,11 +61,11 @@ function VerifyEmailContent() {
         {state === 'error' && (
           <>
             <h1 className="mb-3 text-2xl font-semibold">
-              Verification failed
+              {t('verify.failedTitle')}
             </h1>
             <p className="mb-6 text-gray-600">{message}</p>
             <Link href="/login" className="text-blue-600 underline">
-              Back to login
+              {t('verify.backToLogin')}
             </Link>
           </>
         )}

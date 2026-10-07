@@ -7,8 +7,11 @@ import { ApiRequestError } from "@/lib/api";
 import { UserRole } from "@/lib/types";
 import Particles from "@/components/particles";
 import Logo from "@/components/logo";
+import LanguageToggle from "@/components/language-toggle";
+import { useT } from "@/lib/i18n/context";
 
 export default function RegisterPage() {
+  const t = useT();
   const { register } = useAuth();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -29,7 +32,7 @@ export default function RegisterPage() {
       if (err instanceof ApiRequestError) {
         setError(err.messages.join(", "));
       } else {
-        setError("Could not reach the server. Check your connection.");
+        setError(t("auth.networkError"));
       }
     } finally {
       setSubmitting(false);
@@ -106,12 +109,12 @@ export default function RegisterPage() {
           </Link>
 
           <h1 className="mt-8 font-display text-3xl font-bold text-text lg:mt-0">
-            Create your account
+            {t("auth.registerTitle")}
           </h1>
           <p className="mt-2 text-sm text-muted">
             {isCandidate
-              ? "Apply to openings and track every application."
-              : "Publish openings and review who applied."}
+              ? t("auth.registerSubtitleCandidate")
+              : t("auth.registerSubtitleCompany")}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-9 space-y-5">
@@ -125,7 +128,7 @@ export default function RegisterPage() {
                     : "rounded-md py-2.5 text-sm text-muted transition hover:text-text"
                 }
               >
-                Candidate
+                {t("role.candidate")}
               </button>
               <button
                 type="button"
@@ -136,13 +139,13 @@ export default function RegisterPage() {
                     : "rounded-md py-2.5 text-sm text-muted transition hover:text-text"
                 }
               >
-                Company
+                {t("role.company")}
               </button>
             </div>
 
             <div>
               <label className="text-sm text-muted">
-                {isCandidate ? "Full name" : "Company name"}
+                {isCandidate ? t("auth.fullName") : t("auth.companyName")}
               </label>
               <input
                 type="text"
@@ -176,7 +179,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={field}
-                placeholder="At least 8 characters"
+                placeholder={t("auth.passwordHint")}
               />
             </div>
 
@@ -191,7 +194,7 @@ export default function RegisterPage() {
               disabled={submitting}
               className="btn-primary w-full rounded-lg py-3 font-semibold disabled:opacity-50"
             >
-              {submitting ? "Creating account" : "Create account"}
+              {submitting ? t("auth.creating") : t("auth.createAccountShort")}
             </button>
           </form>
 

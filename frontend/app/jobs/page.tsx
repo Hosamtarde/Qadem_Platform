@@ -10,9 +10,11 @@ import {
   JobType,
   JobFilters,
   PaginationMeta,
-  JOB_TYPE_LABELS,
 } from "@/lib/types";
 import Logo from "@/components/logo";
+import LanguageToggle from "@/components/language-toggle";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, jobTypeKey } from "@/lib/i18n/dictionaries";
 
 const TYPES: (JobType | "ALL")[] = [
   "ALL",
@@ -27,6 +29,7 @@ function initials(name: string) {
 }
 
 function PublicJobsView() {
+  const tr = useT();
   const router = useRouter();
   const params = useSearchParams();
   const { user } = useAuth();
@@ -76,7 +79,7 @@ function PublicJobsView() {
         setJobs(res.data);
         setMeta(res.meta);
       })
-      .catch(() => setError("Could not load openings. Try again shortly."))
+      .catch(() => setError(tr("jobs.loadError")))
       .finally(() => setLoading(false));
   }, [search, type, location, sortBy, page]);
 
@@ -103,13 +106,13 @@ function PublicJobsView() {
                   href="/login"
                   className="rounded-lg px-4 py-2 text-sm text-muted transition hover:text-text"
                 >
-                  Sign in
+                  {tr("nav.signIn")}
                 </Link>
                 <Link
                   href="/register"
-                  className="btn-primary ml-2 rounded-lg px-5 py-2 text-sm font-semibold"
+                  className="btn-primary ms-2 rounded-lg px-5 py-2 text-sm font-semibold"
                 >
-                  Get started
+                  {tr("nav.getStarted")}
                 </Link>
               </>
             )}
@@ -121,13 +124,15 @@ function PublicJobsView() {
 
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-10">
         <h1 className="font-display text-3xl font-bold text-text">
-          Open positions
+          {tr("jobs.title")}
         </h1>
         <p className="mt-2 text-sm text-muted">
           {loading
-            ? "Searching"
+            ? tr("common.searching")
             : meta
-              ? `${meta.total} ${meta.total === 1 ? "role" : "roles"} found`
+              ? tr(meta.total === 1 ? "jobs.countOne" : "jobs.countMany", {
+                  count: meta.total,
+                })
               : ""}
         </p>
 
@@ -142,14 +147,14 @@ function PublicJobsView() {
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search by title or description"
+            placeholder={tr("jobs.searchPlaceholder")}
             className="flex-1 rounded-lg border border-line bg-panel px-4 py-3 text-text placeholder:text-muted/50 outline-none transition focus:border-brand"
           />
           <button
             type="submit"
             className="btn-primary rounded-lg px-6 py-3 text-sm font-semibold"
           >
-            Search
+            {tr("common.search")}
           </button>
         </form>
 
@@ -167,7 +172,7 @@ function PublicJobsView() {
                       : "rounded-md px-4 py-2 text-xs text-muted transition hover:text-text"
                   }
                 >
-                  {t === "ALL" ? "All types" : JOB_TYPE_LABELS[t as JobType]}
+                  {t === "ALL" ? tr("jobs.allTypes") : tr(jobTypeKey(t as JobType))}
                 </button>
               );
             })}
@@ -184,7 +189,7 @@ function PublicJobsView() {
                     : "btn-ghost rounded-lg px-4 py-2 text-xs"
                 }
               >
-                {c}
+                {tr(cityKey(c))}
               </button>
             ))}
           </div>
@@ -194,7 +199,7 @@ function PublicJobsView() {
               onClick={() => router.push("/jobs")}
               className="px-3 py-2 text-xs text-muted underline underline-offset-4 transition hover:text-text"
             >
-              Clear filters
+              {tr("jobs.clearFilters")}
             </button>
           )}
         </div>
@@ -207,9 +212,9 @@ function PublicJobsView() {
 
         {!loading && !error && jobs.length === 0 && (
           <div className="surface mt-8 rounded-xl px-8 py-20 text-center">
-            <p className="font-semibold text-text">No matches</p>
+            <p className="font-semibold text-text">{tr("jobs.noMatches")}</p>
             <p className="mt-2 text-sm text-muted">
-              Try a different search term or clear some filters.
+              {tr("jobs.noMatchesBody")}
             </p>
           </div>
         )}
@@ -217,7 +222,7 @@ function PublicJobsView() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {jobs.map((job) => {
             const isIntern = job.type === "INTERNSHIP";
-            const org = job.company?.name ?? "Company";
+            const org = job.company?.name ?? tr("role.company");
             return (
               <Link
                 key={job.id}
@@ -233,7 +238,7 @@ function PublicJobsView() {
                       {org}
                     </p>
                     <p className="truncate text-xs text-muted">
-                      {job.location}
+                      {tr(cityKey(job.location))}
                     </p>
                   </div>
                 </div>
@@ -254,7 +259,7 @@ function PublicJobsView() {
                       isIntern ? "badge badge-brand" : "badge badge-neutral"
                     }
                   >
-                    {JOB_TYPE_LABELS[job.type]}
+                    {tr(jobTypeKey(job.type))}
                   </span>
                   {(job.salaryMin || job.salaryMax) && (
                     <span className="text-xs font-semibold text-text">
@@ -274,7 +279,7 @@ function PublicJobsView() {
               onClick={() => push({ page: String(page - 1) })}
               className="btn-ghost rounded-lg px-4 py-2 text-sm disabled:opacity-40"
             >
-              Previous
+              {tr("common.previous")}
             </button>
 
             {Array.from({ length: meta.totalPages }, (_, i) => i + 1).map(
@@ -298,7 +303,7 @@ function PublicJobsView() {
               onClick={() => push({ page: String(page + 1) })}
               className="btn-ghost rounded-lg px-4 py-2 text-sm disabled:opacity-40"
             >
-              Next
+              {tr("common.next")}
             </button>
           </div>
         )}
@@ -306,17 +311,16 @@ function PublicJobsView() {
         {!user && jobs.length > 0 && (
           <div className="surface mt-10 rounded-xl px-8 py-10 text-center">
             <p className="font-display text-xl font-bold text-text">
-              Ready to apply?
+              {tr("jobs.readyTitle")}
             </p>
             <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
-              Create a candidate account, add your resume, and apply in one
-              click.
+              {tr("jobs.readyBody")}
             </p>
             <Link
               href="/register"
               className="btn-primary mt-6 inline-block rounded-lg px-6 py-3 text-sm font-semibold"
             >
-              Create an account
+              {tr("common.createAccount")}
             </Link>
           </div>
         )}

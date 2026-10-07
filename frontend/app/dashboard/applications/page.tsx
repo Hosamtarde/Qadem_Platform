@@ -8,10 +8,10 @@ import { listMyApplications } from "@/lib/applications";
 import {
   Application,
   ApplicationStatus,
-  JOB_TYPE_LABELS,
   STATUS_BADGES,
-  STATUS_LABELS,
 } from "@/lib/types";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, jobTypeKey, statusKey } from "@/lib/i18n/dictionaries";
 
 const FILTERS: (ApplicationStatus | "ALL")[] = [
   "ALL",
@@ -30,6 +30,7 @@ function formatDate(value: string) {
 }
 
 export default function MyApplicationsPage() {
+  const t = useT();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -49,7 +50,7 @@ export default function MyApplicationsPage() {
     if (!user || user.role !== "CANDIDATE") return;
     listMyApplications()
       .then(setApplications)
-      .catch(() => setError("Could not load your applications."))
+      .catch(() => setError(t("apps.loadError")))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -77,7 +78,7 @@ export default function MyApplicationsPage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading</p>
+        <p className="text-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -85,16 +86,18 @@ export default function MyApplicationsPage() {
   return (
     <>
       <header className="border-b border-line px-6 py-5 lg:px-10">
-        <p className="text-sm text-muted">Candidate workspace</p>
+        <p className="text-sm text-muted">{t("dash.candidateSpace")}</p>
         <h1 className="mt-1 font-display text-2xl font-bold text-text">
-          My applications
+          {t("nav.myApplications")}
         </h1>
       </header>
 
       <main className="px-6 py-8 lg:px-10">
         <p className="text-sm text-muted">
-          {applications.length}{" "}
-          {applications.length === 1 ? "application" : "applications"} sent
+          {t(
+            applications.length === 1 ? "apps.countOne" : "apps.countMany",
+            { count: applications.length },
+          )}
         </p>
 
         <div className="mt-6 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-4">
@@ -103,7 +106,7 @@ export default function MyApplicationsPage() {
           ).map((s) => (
             <div key={s} className="bg-panel p-5">
               <span className={`badge ${STATUS_BADGES[s]}`}>
-                {STATUS_LABELS[s]}
+                {t(statusKey(s))}
               </span>
               <p className="mt-3 font-display text-2xl font-bold text-text">
                 {counts[s]}
@@ -120,10 +123,8 @@ export default function MyApplicationsPage() {
 
         {applications.length === 0 && !error && (
           <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
-            <p className="font-semibold text-text">Nothing sent yet</p>
-            <p className="mt-2 text-sm text-muted">
-              Browse the board and apply to your first opening.
-            </p>
+            <p className="font-semibold text-text">{t("apps.emptyTitle")}</p>
+            <p className="mt-2 text-sm text-muted">{t("apps.emptyBody")}</p>
             <Link
               href="/dashboard/browse"
               className="btn-primary mt-7 inline-block rounded-lg px-6 py-2.5 text-sm font-semibold"
@@ -146,7 +147,7 @@ export default function MyApplicationsPage() {
                       : "rounded-md px-4 py-2 text-xs text-muted transition hover:text-text"
                   }
                 >
-                  {f === "ALL" ? "All" : STATUS_LABELS[f]}
+                  {f === "ALL" ? t("common.all") : t(statusKey(f))}
                 </button>
               ))}
             </div>
@@ -160,18 +161,18 @@ export default function MyApplicationsPage() {
                         href={`/jobs/${app.job?.id ?? ""}`}
                         className="font-display text-lg font-bold text-text transition hover:text-brand"
                       >
-                        {app.job?.title ?? "Opening"}
+                        {app.job?.title ?? t("apps.opening")}
                       </Link>
                       <p className="mt-1.5 text-sm text-muted">
-                        {app.job?.companyName ?? "Company"} -{" "}
-                        {app.job?.location ?? ""}
+                        {app.job?.companyName ?? t("role.company")} -{" "}
+                        {t(cityKey(app.job?.location))}
                         {app.job?.type
-                          ? ` - ${JOB_TYPE_LABELS[app.job.type]}`
+                          ? ` - ${t(jobTypeKey(app.job.type))}`
                           : ""}
                       </p>
                     </div>
                     <span className={`badge ${STATUS_BADGES[app.status]}`}>
-                      {STATUS_LABELS[app.status]}
+                      {t(statusKey(app.status))}
                     </span>
                   </div>
 
@@ -184,7 +185,7 @@ export default function MyApplicationsPage() {
                   {app.companyNote && (
                     <div className="mt-4 rounded-lg border border-line bg-panel-2 px-4 py-3">
                       <p className="text-xs font-medium text-brand">
-                        Note from the company
+                        {t("apps.companyNote")}
                       </p>
                       <p className="mt-1.5 text-sm text-muted">
                         {app.companyNote}
@@ -195,9 +196,15 @@ export default function MyApplicationsPage() {
                   <div className="rule my-5" />
 
                   <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
-                    <span>Sent {formatDate(app.createdAt)}</span>
+                    <span>
+                      {t("apps.sentOn", { date: formatDate(app.createdAt) })}
+                    </span>
                     {app.respondedAt && (
-                      <span>First response {formatDate(app.respondedAt)}</span>
+                      <span>
+                        {t("apps.respondedOn", {
+                          date: formatDate(app.respondedAt),
+                        })}
+                      </span>
                     )}
                   </div>
                 </li>
@@ -207,7 +214,7 @@ export default function MyApplicationsPage() {
             {visible.length === 0 && (
               <div className="surface mt-6 rounded-xl px-8 py-14 text-center">
                 <p className="text-sm text-muted">
-                  No applications with this status.
+                  {t("apps.noneWithStatus")}
                 </p>
               </div>
             )}

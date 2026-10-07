@@ -12,11 +12,14 @@ import {
 } from "@/lib/candidates";
 import { ApiRequestError } from "@/lib/api";
 import { CandidateProfile } from "@/lib/types";
+import { useT } from "@/lib/i18n/context";
+import { cityKey } from "@/lib/i18n/dictionaries";
 
 const linkClass =
   "text-brand underline underline-offset-4 transition hover:text-brand-soft";
 
 export default function CandidateProfilePage() {
+  const t = useT();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -52,7 +55,7 @@ export default function CandidateProfilePage() {
     if (!user || user.role !== "CANDIDATE") return;
     getMyProfile()
       .then(setProfile)
-      .catch(() => setError("Could not load your profile."))
+      .catch(() => setError(t("prof.loadError")))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -85,7 +88,7 @@ export default function CandidateProfilePage() {
       });
       setProfile(updated);
     } catch {
-      setError("Could not update your availability.");
+      setError(t("prof.availabilityError"));
     } finally {
       setTogglingOpen(false);
     }
@@ -115,7 +118,7 @@ export default function CandidateProfilePage() {
       if (err instanceof ApiRequestError) {
         setError(err.messages.join(", "));
       } else {
-        setError("Could not save your changes.");
+        setError(t("company.saveError"));
       }
     } finally {
       setSaving(false);
@@ -133,7 +136,7 @@ export default function CandidateProfilePage() {
       setProfile(updated);
       setSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      setError(err instanceof Error ? err.message : t("prof.uploadFailed"));
     } finally {
       setUploading(false);
       if (fileInput.current) fileInput.current.value = "";
@@ -141,13 +144,13 @@ export default function CandidateProfilePage() {
   }
 
   async function handleRemoveFile() {
-    if (!confirm("Remove your uploaded resume?")) return;
+    if (!confirm(t("prof.confirmRemove"))) return;
     setError("");
     try {
       const updated = await removeResume();
       setProfile(updated);
     } catch {
-      setError("Could not remove the file.");
+      setError(t("prof.removeError"));
     }
   }
 
@@ -157,7 +160,7 @@ export default function CandidateProfilePage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading</p>
+        <p className="text-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -174,9 +177,9 @@ export default function CandidateProfilePage() {
     <>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-5 lg:px-10">
         <div>
-          <p className="text-sm text-muted">Candidate workspace</p>
+          <p className="text-sm text-muted">{t("dash.candidateSpace")}</p>
           <h1 className="mt-1 font-display text-2xl font-bold text-text">
-            My profile
+            {t("prof.title")}
           </h1>
         </div>
         {!editing && (
@@ -184,7 +187,7 @@ export default function CandidateProfilePage() {
             onClick={startEditing}
             className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
           >
-            Edit profile
+            {t("dash.editProfile")}
           </button>
         )}
       </header>
@@ -192,8 +195,8 @@ export default function CandidateProfilePage() {
       <main className="px-6 py-8 lg:px-10">
         <p className="text-sm text-muted">
           {editing
-            ? "Companies see this when you apply."
-            : "This is what companies see with every application you send."}
+            ? t("prof.editingNote")
+            : t("prof.viewNote")}
         </p>
 
         {saved && !editing && (
@@ -242,20 +245,20 @@ export default function CandidateProfilePage() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <h2 className="text-base font-semibold text-text">
-                    Open to work
+                    {t("prof.openToWork")}
                   </h2>
                   {profile.isOpenToWork && (
                     <span className="flex items-center gap-1.5 rounded-full bg-brand/15 px-2.5 py-0.5 text-[11px] font-semibold text-brand">
                       <span className="h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_6px_rgba(46,116,181,0.9)]" />
-                      Visible
+                      {t("prof.visible")}
                     </span>
                   )}
                 </div>
 
                 <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-muted">
                   {profile.isOpenToWork
-                    ? "Companies searching for talent can find your profile and invite you to roles. Your phone number and resume stay private until you accept an invitation."
-                    : "Turn this on to let companies discover you and send you invitations. You stay hidden from search until you do."}
+                    ? t("prof.openOnBody")
+                    : t("prof.openOffBody")}
                 </p>
               </div>
             </div>
@@ -294,10 +297,12 @@ export default function CandidateProfilePage() {
                     {profile.fullName}
                   </h2>
                   <p className="mt-1 text-muted">
-                    {profile.headline ?? "No headline yet"}
+                    {profile.headline ?? t("prof.noHeadline")}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted">
-                    {profile.location ? <span>{profile.location}</span> : null}
+                    {profile.location ? (
+                      <span>{t(cityKey(profile.location))}</span>
+                    ) : null}
                     {profile.yearsOfExperience != null ? (
                       <span>
                         {profile.yearsOfExperience}
@@ -323,7 +328,9 @@ export default function CandidateProfilePage() {
               {profile.skills.length > 0 ? (
                 <>
                   <div className="rule my-7" />
-                  <p className="text-sm font-semibold text-brand">Skills</p>
+                  <p className="text-sm font-semibold text-brand">
+                    {t("talent.skills")}
+                  </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {profile.skills.map((s) => (
                       <span key={s} className="badge badge-neutral">
@@ -353,15 +360,16 @@ export default function CandidateProfilePage() {
             </section>
 
             <section className="surface mt-4 rounded-xl p-8">
-              <h2 className="text-sm font-semibold text-brand">Resume</h2>
+              <h2 className="text-sm font-semibold text-brand">
+                {t("appl.resume")}
+              </h2>
               <p className="mt-2 text-sm text-muted">
-                Upload a file, link to one, or both. Companies see whichever you
-                provide.
+                {t("prof.resumeNote")}
               </p>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-lg border border-line bg-panel-2 p-5">
-                  <p className="text-sm font-medium text-text">Uploaded file</p>
+                  <p className="text-sm font-medium text-text">{t("prof.uploadedFile")}</p>
                   {profile.hasResumeFile ? (
                     <>
                       <p className="mt-2 truncate text-sm text-muted">
@@ -377,19 +385,19 @@ export default function CandidateProfilePage() {
                           }
                           className="btn-ghost rounded-lg px-4 py-2 text-xs"
                         >
-                          Download
+                          {t("prof.download")}
                         </button>
                         <button
                           onClick={handleRemoveFile}
                           className="rounded-lg border border-danger/30 px-4 py-2 text-xs text-danger/80 transition hover:bg-danger/10"
                         >
-                          Remove
+                          {t("prof.remove")}
                         </button>
                       </div>
                     </>
                   ) : (
                     <p className="mt-2 text-sm text-muted/60">
-                      Nothing uploaded yet
+                      {t("prof.nothingUploaded")}
                     </p>
                   )}
 
@@ -406,25 +414,29 @@ export default function CandidateProfilePage() {
                     className="btn-primary mt-4 w-full rounded-lg py-2.5 text-xs font-semibold disabled:opacity-50"
                   >
                     {uploading
-                      ? "Uploading"
+                      ? t("prof.uploading")
                       : profile.hasResumeFile
-                        ? "Replace file"
-                        : "Upload PDF or DOCX"}
+                        ? t("prof.replaceFile")
+                        : t("prof.uploadFile")}
                   </button>
                   <p className="mt-3 text-xs text-muted/60">
-                    Up to 5 MB. PDF, DOC or DOCX.
+                    {t("prof.uploadHint")}
                   </p>
                 </div>
 
                 <div className="rounded-lg border border-line bg-panel-2 p-5">
-                  <p className="text-sm font-medium text-text">External link</p>
+                  <p className="text-sm font-medium text-text">
+                    {t("prof.externalLink")}
+                  </p>
                   {profile.resumeUrl ? (
                     <a href={profile.resumeUrl} target="_blank" rel="noreferrer" className="mt-2 block truncate text-sm text-brand underline underline-offset-4">{profile.resumeUrl}</a>
                   ) : (
-                    <p className="mt-2 text-sm text-muted/60">No link set</p>
+                    <p className="mt-2 text-sm text-muted/60">
+                      {t("prof.noLink")}
+                    </p>
                   )}
                   <p className="mt-4 text-xs text-muted/60">
-                    Add or change it from Edit profile.
+                    {t("prof.addFromEdit")}
                   </p>
                 </div>
               </div>
@@ -437,56 +449,56 @@ export default function CandidateProfilePage() {
             <div className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm text-muted">Headline</label>
+                  <label className="text-sm text-muted">{t("prof.headline")}</label>
                   <input
                     type="text"
                     value={headline}
                     onChange={(e) => setHeadline(e.target.value)}
                     className={field}
-                    placeholder="Backend Developer"
+                    placeholder={t("prof.headlinePlaceholder")}
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted">Location</label>
+                  <label className="text-sm text-muted">{t("job.location")}</label>
                   <input
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className={field}
-                    placeholder="Nablus"
+                    placeholder={t("city.nablus")}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-muted">About you</label>
+                <label className="text-sm text-muted">{t("prof.about")}</label>
                 <textarea
                   rows={5}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   className={field}
-                  placeholder="What you work on, what you are looking for."
+                  placeholder={t("prof.aboutPlaceholder")}
                 />
               </div>
 
               <div>
-                <label className="text-sm text-muted">Skills</label>
+                <label className="text-sm text-muted">{t("talent.skills")}</label>
                 <input
                   type="text"
                   value={skillsText}
                   onChange={(e) => setSkillsText(e.target.value)}
                   className={field}
-                  placeholder="NestJS, TypeScript, PostgreSQL"
+                  placeholder={t("prof.skillsPlaceholder")}
                 />
                 <p className="mt-2 text-xs text-muted/60">
-                  Separate each skill with a comma.
+                  {t("prof.skillsHint")}
                 </p>
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
                   <label className="text-sm text-muted">
-                    Years of experience
+                    {t("prof.years")}
                   </label>
                   <input
                     type="number"
@@ -498,7 +510,7 @@ export default function CandidateProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted">Phone</label>
+                  <label className="text-sm text-muted">{t("appl.phone")}</label>
                   <input
                     type="tel"
                     value={phone}
@@ -544,7 +556,7 @@ export default function CandidateProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted">Resume link</label>
+                  <label className="text-sm text-muted">{t("prof.resumeLink")}</label>
                   <input
                     type="url"
                     value={resumeUrl}
@@ -562,14 +574,14 @@ export default function CandidateProfilePage() {
                 disabled={saving}
                 className="btn-primary rounded-lg px-7 py-3 font-semibold disabled:opacity-50"
               >
-                {saving ? "Saving" : "Save changes"}
+                {saving ? t("common.saving") : t("common.saveChanges")}
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
                 className="btn-ghost rounded-lg px-7 py-3 font-semibold"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </form>
