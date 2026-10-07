@@ -56,6 +56,17 @@ export default function Home() {
         </div>
       </header>
 
+      <div className="relative z-20 border-b border-line-soft bg-panel-2/60">
+        <div className="mx-auto flex max-w-6xl items-center justify-center gap-2 px-6 py-2.5">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-warn" />
+          <p className="text-center text-xs text-muted">
+            <span className="font-semibold text-text">Demo data.</span>{" "}
+            Company names, openings and response figures are sample content for
+            demonstration, not real listings.
+          </p>
+        </div>
+      </div>
+
       <section className="relative overflow-hidden border-b border-line-soft">
         <Particles />
         <div className="grid-lines" />
