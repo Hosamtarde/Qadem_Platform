@@ -6,12 +6,13 @@ import { Job } from "../modules/jobs/entities/job.entity";
 import { CandidateProfile } from "../modules/candidates/entities/candidate-profile.entity";
 import { Application } from "../modules/applications/entities/application.entity";
 import { ApplicationStatus, UserRole } from "../common/enums";
-import { seedResponseProfiles } from "./seed-data";
 import {
   SEED_PASSWORD,
   seedApplications,
   seedCandidates,
   seedCompanies,
+  seedHistoryCandidates,
+  seedResponseProfiles,
 } from "./seed-data";
 
 async function seed() {
@@ -62,7 +63,6 @@ async function seed() {
         description: item.description,
         website: item.website,
         location: item.location,
-        
       }),
     );
 
@@ -150,19 +150,19 @@ async function seed() {
   }
 
   console.log("");
-    console.log("");
   console.log("Response history:");
 
   const bulkCandidates: User[] = [];
 
-  // Filler candidates exist only to carry applications. They are not open
-  // to work, so they never surface in talent search.
-  for (let i = 0; i < 60; i += 1) {
+  // Past applicants. They exist only to carry the applications the response
+  // score is computed from, so they are never open to work and never appear
+  // in talent search.
+  for (const person of seedHistoryCandidates) {
     const user = await usersRepo.save(
       usersRepo.create({
-        email: `applicant${i + 1}@example.com`,
+        email: person.email,
         password: hashedPassword,
-        fullName: `Applicant ${i + 1}`,
+        fullName: person.fullName,
         role: UserRole.CANDIDATE,
         isEmailVerified: true,
       }),
@@ -171,8 +171,8 @@ async function seed() {
     await profilesRepo.save(
       profilesRepo.create({
         userId: user.id,
-        headline: "Software Developer",
-        location: "Palestine",
+        headline: person.headline,
+        location: person.location,
         skills: [],
         isOpenToWork: false,
       }),
@@ -250,22 +250,60 @@ async function seed() {
   console.log("");
   console.log(`  History applications: ${historyCount}`);
   console.log("Done.");
-  console.log(`  Companies:    ${companyByEmail.size}`);
-  console.log(`  Jobs:         ${jobCount}`);
-  console.log(`  Candidates:   ${seedCandidates.length}`);
-  console.log(`  Applications: ${applicationCount}`);
+  console.log(`  Companies:       ${companyByEmail.size}`);
+  console.log(`  Jobs:            ${jobCount}`);
+  console.log(`  Candidates:      ${seedCandidates.length}`);
+  console.log(`  Past applicants: ${bulkCandidates.length}`);
+  console.log(`  Applications:    ${applicationCount}`);
   if (skipped > 0) {
-    console.log(`  Skipped:      ${skipped} (job title did not match)`);
+    console.log(`  Skipped:         ${skipped} (job title did not match)`);
   }
   console.log("");
   console.log(`  Password for every account: ${SEED_PASSWORD}`);
+
+  // The seed owns the data it generates, so it owns the statistics derived
+  // from that data. Without this the companies sit at NULL until the hourly
+  // cron runs, and the dashboard shows "no applications yet" next to a full
+  // pipeline.
+  console.log("");
+  console.log("Computing response statistics...");
+
+  await dataSource.query(`
+    UPDATE companies c
+    SET "responseRate"       = s.rate,
+        "avgResponseDays"    = s.avg_days,
+        "responseSampleSize" = s.total,
+        "responseStatsAt"    = NOW()
+    FROM (
+      SELECT j."companyId" AS company_id,
+             COUNT(*)                                                  AS total,
+             ROUND(100.0 * COUNT(*) FILTER (WHERE a."respondedAt" IS NOT NULL)
+                   / COUNT(*), 2)                                      AS rate,
+             ROUND(AVG(EXTRACT(EPOCH FROM (a."respondedAt" - a."createdAt")) / 86400)
+                   FILTER (WHERE a."respondedAt" IS NOT NULL), 2)       AS avg_days
+      FROM applications a
+      JOIN jobs j ON j.id = a."jobId"
+      GROUP BY j."companyId"
+    ) s
+    WHERE c.id = s.company_id
+  `);
+
+  const computed = await dataSource.query<
+    { name: string; responseRate: string | null; responseSampleSize: number }[]
+  >(`SELECT name, "responseRate", "responseSampleSize" FROM companies ORDER BY name`);
+
+  for (const row of computed) {
+    const rate =
+      row.responseRate === null
+        ? "no score"
+        : `${Math.round(Number(row.responseRate))}%`;
+    console.log(`  ${row.name}: ${rate} (${row.responseSampleSize} applications)`);
+  }
+
   console.log("");
 
   await dataSource.destroy();
-  
 }
-
-
 
 seed().catch((err) => {
   console.error("Seed failed:", err);

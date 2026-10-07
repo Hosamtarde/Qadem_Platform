@@ -20,7 +20,6 @@ export interface SeedCompany {
   jobs: SeedJob[];
 }
 
-// Demo accounts only. Rotate this before sharing the platform publicly.
 export const SEED_PASSWORD = "lRYGrzau5WtLDS57";
 
 export const seedCompanies: SeedCompany[] = [
@@ -192,6 +191,36 @@ export const seedCompanies: SeedCompany[] = [
       },
     ],
   },
+  {
+    email: "northline@example.com",
+    name: "Northline Labs",
+    description:
+      "A fictional company included in this demo to show how the response score behaves for an employer that rarely replies to applicants.",
+    website: "https://example.com",
+    location: "Bethlehem",
+    jobs: [
+      {
+        title: "Junior Web Developer",
+        description:
+          "Build and maintain small web projects for local clients, with support from a senior developer.",
+        requirements: "HTML, CSS, JavaScript, basic Git.",
+        type: JobType.FULL_TIME,
+        location: "Bethlehem",
+        salaryMin: 2500,
+        salaryMax: 4000,
+      },
+      {
+        title: "Support Engineer",
+        description:
+          "Handle incoming issues from our clients and escalate what needs engineering attention.",
+        requirements: "Clear written English, basic SQL, patience.",
+        type: JobType.PART_TIME,
+        location: "Bethlehem",
+        salaryMin: 1800,
+        salaryMax: 2800,
+      },
+    ],
+  },
 ];
 
 export const seedCandidates = [
@@ -311,7 +340,6 @@ export const seedApplications: SeedApplication[] = [
   },
 ];
 
-
 export interface SeedResponseProfile {
   companyEmail: string;
   totalApplications: number;
@@ -321,22 +349,28 @@ export interface SeedResponseProfile {
 
 export const seedResponseProfiles: SeedResponseProfile[] = [
   {
+    companyEmail: "wahj@example.com",
+    totalApplications: 38,
+    answeredRatio: 0.91,
+    avgDays: 2,
+  },
+  {
     companyEmail: "foothill@example.com",
     totalApplications: 52,
     answeredRatio: 0.83,
     avgDays: 4,
   },
   {
-    companyEmail: "wahj@example.com",
-    totalApplications: 28,
-    answeredRatio: 0.61,
-    avgDays: 8,
-  },
-  {
     companyEmail: "asal@example.com",
     totalApplications: 44,
-    answeredRatio: 0.34,
-    avgDays: 17,
+    answeredRatio: 0.72,
+    avgDays: 6,
+  },
+  {
+    companyEmail: "northline@example.com",
+    totalApplications: 31,
+    answeredRatio: 0.29,
+    avgDays: 19,
   },
   {
     companyEmail: "harri@example.com",
@@ -344,6 +378,77 @@ export const seedResponseProfiles: SeedResponseProfile[] = [
     answeredRatio: 0.5,
     avgDays: 5,
   },
+];
+
+export interface SeedHistoryCandidate {
+  email: string;
+  fullName: string;
+  headline: string;
+  location: string;
+}
+
+
+export const seedHistoryCandidates: SeedHistoryCandidate[] = [
+  { email: "ahmad.zaid@example.com", fullName: "Ahmad Zaid", headline: "Frontend Developer", location: "Ramallah" },
+  { email: "dana.hamed@example.com", fullName: "Dana Hamed", headline: "Backend Developer", location: "Nablus" },
+  { email: "omar.nassar@example.com", fullName: "Omar Nassar", headline: "Full Stack Developer", location: "Hebron" },
+  { email: "rawan.shaheen@example.com", fullName: "Rawan Shaheen", headline: "QA Engineer", location: "Bethlehem" },
+  { email: "yousef.khalil@example.com", fullName: "Yousef Khalil", headline: "Mobile Developer", location: "Rawabi" },
+  { email: "sara.abed@example.com", fullName: "Sara Abed", headline: "UI/UX Designer", location: "Ramallah" },
+  { email: "mahmoud.awad@example.com", fullName: "Mahmoud Awad", headline: "DevOps Engineer", location: "Nablus" },
+  { email: "maryam.jarrar@example.com", fullName: "Maryam Jarrar", headline: "Frontend Developer", location: "Hebron" },
+  { email: "ibrahim.saleh@example.com", fullName: "Ibrahim Saleh", headline: "Backend Developer", location: "Bethlehem" },
+  { email: "aya.hijazi@example.com", fullName: "Aya Hijazi", headline: "Data Analyst", location: "Rawabi" },
+  { email: "khaled.mansour@example.com", fullName: "Khaled Mansour", headline: "Full Stack Developer", location: "Ramallah" },
+  { email: "lina.darwish@example.com", fullName: "Lina Darwish", headline: "QA Engineer", location: "Nablus" },
+  { email: "rami.haddad@example.com", fullName: "Rami Haddad", headline: "Mobile Developer", location: "Hebron" },
+  { email: "hiba.zubaidi@example.com", fullName: "Hiba Zubaidi", headline: "UI/UX Designer", location: "Bethlehem" },
+  { email: "tareq.jaber@example.com", fullName: "Tareq Jaber", headline: "DevOps Engineer", location: "Rawabi" },
+  { email: "noor.ammar@example.com", fullName: "Noor Ammar", headline: "Frontend Developer", location: "Ramallah" },
+  { email: "basel.qasem@example.com", fullName: "Basel Qasem", headline: "Backend Developer", location: "Nablus" },
+  { email: "reem.ghanem@example.com", fullName: "Reem Ghanem", headline: "Data Analyst", location: "Hebron" },
+  { email: "anas.hamdan@example.com", fullName: "Anas Hamdan", headline: "Full Stack Developer", location: "Bethlehem" },
+  { email: "salma.khader@example.com", fullName: "Salma Khader", headline: "QA Engineer", location: "Rawabi" },
+  { email: "majd.shaheen@example.com", fullName: "Majd Shaheen", headline: "Mobile Developer", location: "Ramallah" },
+  { email: "yasmin.tawil@example.com", fullName: "Yasmin Tawil", headline: "UI/UX Designer", location: "Nablus" },
+  { email: "zaid.aburish@example.com", fullName: "Zaid Abu Rish", headline: "DevOps Engineer", location: "Hebron" },
+  { email: "farah.natsheh@example.com", fullName: "Farah Natsheh", headline: "Frontend Developer", location: "Bethlehem" },
+  { email: "hamza.daoud@example.com", fullName: "Hamza Daoud", headline: "Backend Developer", location: "Rawabi" },
+  { email: "rana.barghouti@example.com", fullName: "Rana Barghouti", headline: "Data Analyst", location: "Ramallah" },
+  { email: "sami.khoury@example.com", fullName: "Sami Khoury", headline: "Full Stack Developer", location: "Nablus" },
+  { email: "dima.shaath@example.com", fullName: "Dima Shaath", headline: "QA Engineer", location: "Hebron" },
+  { email: "waleed.ashqar@example.com", fullName: "Waleed Ashqar", headline: "Mobile Developer", location: "Bethlehem" },
+  { email: "tala.abusneineh@example.com", fullName: "Tala Abu Sneineh", headline: "UI/UX Designer", location: "Rawabi" },
+  { email: "firas.tamimi@example.com", fullName: "Firas Tamimi", headline: "DevOps Engineer", location: "Ramallah" },
+  { email: "jana.salah@example.com", fullName: "Jana Salah", headline: "Frontend Developer", location: "Nablus" },
+  { email: "mustafa.alami@example.com", fullName: "Mustafa Alami", headline: "Backend Developer", location: "Hebron" },
+  { email: "hala.zaghloul@example.com", fullName: "Hala Zaghloul", headline: "Data Analyst", location: "Bethlehem" },
+  { email: "jamal.sabbah@example.com", fullName: "Jamal Sabbah", headline: "Full Stack Developer", location: "Rawabi" },
+  { email: "rania.mishal@example.com", fullName: "Rania Mishal", headline: "QA Engineer", location: "Ramallah" },
+  { email: "nadeem.bishara@example.com", fullName: "Nadeem Bishara", headline: "Mobile Developer", location: "Nablus" },
+  { email: "amal.qudah@example.com", fullName: "Amal Qudah", headline: "UI/UX Designer", location: "Hebron" },
+  { email: "osama.rabah@example.com", fullName: "Osama Rabah", headline: "DevOps Engineer", location: "Bethlehem" },
+  { email: "lama.hammad@example.com", fullName: "Lama Hammad", headline: "Frontend Developer", location: "Rawabi" },
+  { email: "ayman.khatib@example.com", fullName: "Ayman Khatib", headline: "Backend Developer", location: "Ramallah" },
+  { email: "shaima.abuzaid@example.com", fullName: "Shaima Abu Zaid", headline: "Data Analyst", location: "Nablus" },
+  { email: "suhaib.abdallah@example.com", fullName: "Suhaib Abdallah", headline: "Full Stack Developer", location: "Hebron" },
+  { email: "haneen.kamal@example.com", fullName: "Haneen Kamal", headline: "QA Engineer", location: "Bethlehem" },
+  { email: "marwan.ismail@example.com", fullName: "Marwan Ismail", headline: "Mobile Developer", location: "Rawabi" },
+  { email: "razan.sweiti@example.com", fullName: "Razan Sweiti", headline: "UI/UX Designer", location: "Ramallah" },
+  { email: "qusai.zahran@example.com", fullName: "Qusai Zahran", headline: "DevOps Engineer", location: "Nablus" },
+  { email: "leen.arafat@example.com", fullName: "Leen Arafat", headline: "Frontend Developer", location: "Hebron" },
+  { email: "baha.shaath@example.com", fullName: "Baha Shaath", headline: "Backend Developer", location: "Bethlehem" },
+  { email: "nisreen.hilal@example.com", fullName: "Nisreen Hilal", headline: "Data Analyst", location: "Rawabi" },
+  { email: "hadi.masri@example.com", fullName: "Hadi Masri", headline: "Full Stack Developer", location: "Ramallah" },
+  { email: "zeina.marzouq@example.com", fullName: "Zeina Marzouq", headline: "QA Engineer", location: "Nablus" },
+  { email: "tamer.nabulsi@example.com", fullName: "Tamer Nabulsi", headline: "Mobile Developer", location: "Hebron" },
+  { email: "mays.qaisi@example.com", fullName: "Mays Qaisi", headline: "UI/UX Designer", location: "Bethlehem" },
+  { email: "laith.rayyan@example.com", fullName: "Laith Rayyan", headline: "DevOps Engineer", location: "Rawabi" },
+  { email: "bayan.idris@example.com", fullName: "Bayan Idris", headline: "Frontend Developer", location: "Ramallah" },
+  { email: "saif.dweik@example.com", fullName: "Saif Dweik", headline: "Backend Developer", location: "Nablus" },
+  { email: "doaa.sarsour@example.com", fullName: "Doaa Sarsour", headline: "Data Analyst", location: "Hebron" },
+  { email: "amjad.qattan@example.com", fullName: "Amjad Qattan", headline: "Full Stack Developer", location: "Bethlehem" },
+  { email: "asil.hroub@example.com", fullName: "Asil Hroub", headline: "QA Engineer", location: "Rawabi" },
 ];
 
 export const seedRole = UserRole;
