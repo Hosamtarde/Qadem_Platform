@@ -9,18 +9,26 @@ import {
   type TalentSearchResult,
 } from "@/lib/talent";
 import InviteDialog from "@/components/invite-dialog";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, type TranslationKey } from "@/lib/i18n/dictionaries";
 
-function openSince(iso: string | null): string {
-  if (!iso) return "";
+function openSince(
+  iso: string | null,
+): { key: TranslationKey; count: number } | null {
+  if (!iso) return null;
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-  if (days < 1) return "Open since today";
-  if (days === 1) return "Open since yesterday";
-  if (days < 30) return `Open for ${days} days`;
+  if (days < 1) return { key: "talent.openToday", count: 0 };
+  if (days === 1) return { key: "talent.openYesterday", count: 1 };
+  if (days < 30) return { key: "talent.openDays", count: days };
   const months = Math.floor(days / 30);
-  return `Open for ${months} ${months === 1 ? "month" : "months"}`;
+  return {
+    key: months === 1 ? "talent.openMonth" : "talent.openMonths",
+    count: months,
+  };
 }
 
 export default function TalentSearchPage() {
+  const t = useT();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -58,7 +66,7 @@ export default function TalentSearchPage() {
         setResult(data);
         setPage(nextPage);
       } catch {
-        setError("Could not load candidates.");
+        setError(t("talent.loadError"));
       } finally {
         setLoading(false);
       }
@@ -102,32 +110,31 @@ export default function TalentSearchPage() {
   return (
     <>
       <header className="border-b border-line px-6 py-5 lg:px-10">
-        <p className="text-sm text-muted">Company workspace</p>
+        <p className="text-sm text-muted">{t("dash.companySpace")}</p>
         <h1 className="mt-1 font-display text-2xl font-bold text-text">
-          Find talent
+          {t("nav.findTalent")}
         </h1>
       </header>
 
       <main className="px-6 py-8 lg:px-10">
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Candidates who have marked themselves open to work. Contact details
-          and resumes stay private until they accept an invitation from you.
+          {t("talent.intro")}
         </p>
 
         <form onSubmit={handleSubmit} className="surface mt-6 rounded-xl p-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <label className="text-xs font-medium text-muted">Search</label>
+              <label className="text-xs font-medium text-muted">{t("common.search")}</label>
               <input
                 type="text"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 className={field}
-                placeholder="Name or headline"
+                placeholder={t("talent.searchPlaceholder")}
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted">Skills</label>
+              <label className="text-xs font-medium text-muted">{t("talent.skills")}</label>
               <input
                 type="text"
                 value={skillsText}
@@ -137,18 +144,18 @@ export default function TalentSearchPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted">Location</label>
+              <label className="text-xs font-medium text-muted">{t("job.location")}</label>
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 className={field}
-                placeholder="Ramallah"
+                placeholder={t("city.ramallah")}
               />
             </div>
             <div>
               <label className="text-xs font-medium text-muted">
-                Min. experience
+                {t("talent.minExperience")}
               </label>
               <input
                 type="number"
@@ -157,7 +164,7 @@ export default function TalentSearchPage() {
                 value={minYears}
                 onChange={(e) => setMinYears(e.target.value)}
                 className={field}
-                placeholder="Years"
+                placeholder={t("talent.years")}
               />
             </div>
           </div>
@@ -168,7 +175,7 @@ export default function TalentSearchPage() {
               disabled={loading}
               className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold disabled:opacity-50"
             >
-              {loading ? "Searching" : "Search"}
+              {loading ? t("common.searching") : t("common.search")}
             </button>
             {hasFilters && (
               <button
@@ -176,7 +183,7 @@ export default function TalentSearchPage() {
                 onClick={clearFilters}
                 className="btn-ghost rounded-lg px-5 py-2.5 text-sm"
               >
-                Clear
+                {t("talent.clear")}
               </button>
             )}
             <p className="ml-auto text-xs text-muted">
@@ -194,18 +201,23 @@ export default function TalentSearchPage() {
         {result && (
           <p className="mt-6 text-sm text-muted">
             {result.total === 0
-              ? "No candidates match"
-              : `${result.total} ${result.total === 1 ? "candidate" : "candidates"}`}
+              ? t("talent.noMatch")
+              : t(
+                  result.total === 1
+                    ? "talent.countOne"
+                    : "talent.countMany",
+                  { count: result.total },
+                )}
           </p>
         )}
 
         {result && result.items.length === 0 && !loading && (
           <div className="surface mt-4 rounded-xl px-8 py-16 text-center">
-            <p className="font-semibold text-text">Nothing to show yet</p>
+            <p className="font-semibold text-text">{t("talent.emptyTitle")}</p>
             <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
               {hasFilters
-                ? "No one matches these filters. Try widening the skills or clearing the location."
-                : "No candidates have marked themselves open to work yet. Check back soon."}
+                ? t("talent.emptyFiltered")
+                : t("talent.emptyNone")}
             </p>
           </div>
         )}
@@ -230,7 +242,7 @@ export default function TalentSearchPage() {
               disabled={page <= 1 || loading}
               className="btn-ghost rounded-lg px-5 py-2 text-sm disabled:opacity-40"
             >
-              Previous
+              {t("common.previous")}
             </button>
             <span className="text-sm text-muted">
               {page} of {totalPages}
@@ -240,7 +252,7 @@ export default function TalentSearchPage() {
               disabled={page >= totalPages || loading}
               className="btn-ghost rounded-lg px-5 py-2 text-sm disabled:opacity-40"
             >
-              Next
+              {t("common.next")}
             </button>
           </div>
         )}
@@ -266,6 +278,7 @@ function CandidateTile({
   invited: boolean;
   onInvite: () => void;
 }) {
+  const t = useT();
   const initials = candidate.fullName
     .split(" ")
     .map((w) => w[0])
@@ -289,17 +302,21 @@ function CandidateTile({
             {candidate.fullName}
           </h3>
           <p className="truncate text-sm text-muted">
-            {candidate.headline ?? "No headline"}
+            {candidate.headline ?? t("talent.noHeadline")}
           </p>
         </div>
       </div>
 
       <div className="mt-3.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
-        {candidate.location && <span>{candidate.location}</span>}
+        {candidate.location && <span>{t(cityKey(candidate.location))}</span>}
         {candidate.yearsOfExperience != null && (
           <span>
-            {candidate.yearsOfExperience}
-            {candidate.yearsOfExperience === 1 ? " year" : " years"}
+            {t(
+              candidate.yearsOfExperience === 1
+                ? "talent.yearOne"
+                : "talent.yearMany",
+              { count: candidate.yearsOfExperience },
+            )}
           </span>
         )}
       </div>
@@ -328,11 +345,14 @@ function CandidateTile({
       <div className="mt-4 flex items-center gap-3 text-[11px]">
         <span className="flex items-center gap-1.5 text-brand">
           <span className="h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_6px_rgba(46,116,181,0.9)]" />
-          {openSince(candidate.openToWorkSince)}
+          {(() => {
+            const since = openSince(candidate.openToWorkSince);
+            return since ? t(since.key, { count: since.count }) : "";
+          })()}
         </span>
 
         {links.length > 0 && (
-          <span className="ml-auto flex gap-3">
+          <span className="ms-auto flex gap-3">
             {links.map((l) => (
               <a
                 key={l.label}
@@ -357,7 +377,7 @@ function CandidateTile({
             : "btn-primary mt-5 w-full rounded-lg py-2.5 text-sm font-semibold"
         }
       >
-        {invited ? "Invitation sent" : "Invite to a role"}
+        {invited ? t("talent.invited") : t("talent.invite")}
       </button>
     </article>
   );

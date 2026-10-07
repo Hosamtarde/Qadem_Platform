@@ -15,8 +15,9 @@ import {
   Company,
   StatusCounts,
   STATUS_BADGES,
-  STATUS_LABELS,
 } from "@/lib/types";
+import { useT } from "@/lib/i18n/context";
+import { statusKey } from "@/lib/i18n/dictionaries";
 
 const STAGES: ApplicationStatus[] = [
   "SUBMITTED",
@@ -26,6 +27,7 @@ const STAGES: ApplicationStatus[] = [
 ];
 
 export default function DashboardPage() {
+  const t = useT();
   const { user, loading, logout } = useAuth();
   const router = useRouter();
 
@@ -69,7 +71,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading</p>
+        <p className="text-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -87,16 +89,16 @@ export default function DashboardPage() {
 
   const cards = isCandidate
     ? [
-        { label: "Applications sent", value: show(totalApplications) },
-        { label: "Under review", value: show(stats?.REVIEWING) },
-        { label: "Accepted", value: show(stats?.ACCEPTED) },
-        { label: "Rejected", value: show(stats?.REJECTED) },
+        { label: t("dash.applicationsSent"), value: show(totalApplications) },
+        { label: t("dash.underReview"), value: show(stats?.REVIEWING) },
+        { label: t("status.accepted"), value: show(stats?.ACCEPTED) },
+        { label: t("status.rejected"), value: show(stats?.REJECTED) },
       ]
     : [
-        { label: "Total postings", value: show(totalJobs) },
-        { label: "Live postings", value: show(liveJobs) },
-        { label: "Total applicants", value: show(totalApplications) },
-        { label: "Awaiting review", value: show(stats?.SUBMITTED) },
+        { label: t("dash.totalPostings"), value: show(totalJobs) },
+        { label: t("dash.livePostings"), value: show(liveJobs) },
+        { label: t("dash.totalApplicants"), value: show(totalApplications) },
+        { label: t("dash.awaitingReview"), value: show(stats?.SUBMITTED) },
       ];
 
   const pipelineTotal = totalApplications ?? 0;
@@ -116,7 +118,7 @@ export default function DashboardPage() {
       <header className="flex items-center justify-between border-b border-line px-6 py-5 lg:px-10">
         <div>
           <p className="text-sm text-muted">
-            {isCandidate ? "Candidate workspace" : "Company workspace"}
+            {isCandidate ? t("dash.candidateSpace") : t("dash.companySpace")}
           </p>
           <h1 className="mt-1 font-display text-2xl font-bold text-text">
             {user.fullName}
@@ -126,7 +128,7 @@ export default function DashboardPage() {
           onClick={logout}
           className="btn-ghost rounded-lg px-4 py-2 text-sm lg:hidden"
         >
-          Sign out
+          {t("common.signOut")}
         </button>
       </header>
 
@@ -146,20 +148,20 @@ export default function DashboardPage() {
           <section className="surface mt-5 rounded-xl p-7">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-sm font-semibold text-brand">
-                Your response score
+                {t("dash.scoreTitle")}
               </h2>
               {company.responseIsPublic ? (
                 <span className="badge badge-success">
-                  Shown to candidates
+                  {t("dash.scoreShown")}
                 </span>
               ) : (
-                <span className="badge badge-neutral">Not shown yet</span>
+                <span className="badge badge-neutral">{t("dash.scoreHidden")}</span>
               )}
             </div>
 
             {rate === null ? (
               <p className="mt-4 text-sm text-muted">
-                No applications yet. Your score starts once candidates apply.
+                {t("dash.scoreEmpty")}
               </p>
             ) : (
               <>
@@ -171,7 +173,7 @@ export default function DashboardPage() {
                       {rate}%
                     </p>
                     <p className="mt-1 text-sm text-muted">
-                      of applicants got a reply
+                      {t("dash.scoreReplied")}
                     </p>
                   </div>
                   <div>
@@ -179,7 +181,7 @@ export default function DashboardPage() {
                       {company.avgResponseDays ?? "-"}
                     </p>
                     <p className="mt-1 text-sm text-muted">
-                      days to reply on average
+                      {t("dash.scoreDays")}
                     </p>
                   </div>
                   <div>
@@ -187,7 +189,7 @@ export default function DashboardPage() {
                       {company.responseSampleSize}
                     </p>
                     <p className="mt-1 text-sm text-muted">
-                      applications measured
+                      {t("dash.scoreMeasured")}
                     </p>
                   </div>
                 </div>
@@ -196,8 +198,10 @@ export default function DashboardPage() {
 
                 <p className="text-sm text-muted">
                   {company.responseIsPublic
-                    ? "Candidates see this on every opening you post. Replying to applications still waiting is what moves it."
-                    : `Candidates see nothing until you reach 10 applications. ${10 - company.responseSampleSize} to go.`}
+                    ? t("dash.scoreNotePublic")
+                    : t("dash.scoreNoteHidden", {
+                        count: 10 - company.responseSampleSize,
+                      })}
                 </p>
               </>
             )}
@@ -207,7 +211,7 @@ export default function DashboardPage() {
         <section className="surface mt-5 rounded-xl p-7">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-semibold text-brand">
-              Application pipeline
+              {t("dash.pipeline")}
             </h2>
             <Link
               href={
@@ -217,15 +221,15 @@ export default function DashboardPage() {
               }
               className="text-xs text-muted underline underline-offset-4 transition hover:text-text"
             >
-              {isCandidate ? "View applications" : "Review applicants"}
+              {isCandidate ? t("dash.viewApplications") : t("dash.reviewApplicants")}
             </Link>
           </div>
 
           {pipelineTotal === 0 ? (
             <p className="mt-4 text-sm text-muted">
               {isCandidate
-                ? "Nothing sent yet. Your applications will appear here."
-                : "No applications yet. They will appear here once candidates apply."}
+                ? t("dash.pipelineEmptyCandidate")
+                : t("dash.pipelineEmptyCompany")}
             </p>
           ) : (
             <>
@@ -256,7 +260,7 @@ export default function DashboardPage() {
                 {STAGES.map((s) => (
                   <div key={s}>
                     <span className={`badge ${STATUS_BADGES[s]}`}>
-                      {STATUS_LABELS[s]}
+                      {t(statusKey(s))}
                     </span>
                     <p className="mt-2 font-display text-2xl font-bold text-text">
                       {stats?.[s] ?? 0}
@@ -271,7 +275,7 @@ export default function DashboardPage() {
         <div className="mt-5 grid gap-5 lg:grid-cols-[1.6fr_1fr]">
           <section className="surface rounded-xl p-7">
             <h2 className="text-sm font-semibold text-brand">
-              {isCandidate ? "Next step" : "Quick actions"}
+              {isCandidate ? t("dash.nextStep") : t("dash.quickActions")}
             </h2>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -281,13 +285,13 @@ export default function DashboardPage() {
                     href="/dashboard/browse"
                     className="btn-primary rounded-lg px-6 py-3 text-sm font-semibold"
                   >
-                    Browse openings
+                    {t("common.browseOpenings")}
                   </Link>
                   <Link
                     href="/dashboard/profile"
                     className="btn-ghost rounded-lg px-6 py-3 text-sm font-semibold"
                   >
-                    Edit profile
+                    {t("dash.editProfile")}
                   </Link>
                 </>
               ) : (
@@ -296,13 +300,13 @@ export default function DashboardPage() {
                     href="/dashboard/jobs"
                     className="btn-primary rounded-lg px-6 py-3 text-sm font-semibold"
                   >
-                    Manage postings
+                    {t("dash.managePostings")}
                   </Link>
                   <Link
                     href="/dashboard/applicants"
                     className="btn-ghost rounded-lg px-6 py-3 text-sm font-semibold"
                   >
-                    Review applicants
+                    {t("dash.reviewApplicants")}
                   </Link>
                 </>
               )}
@@ -312,28 +316,30 @@ export default function DashboardPage() {
 
             <p className="text-sm text-muted">
               {isCandidate
-                ? "A complete profile with a resume gets read more often than one without."
-                : "Applications you leave in Submitted are the ones candidates are still waiting on."}
+                ? t("dash.tipCandidate")
+                : t("dash.tipCompany")}
             </p>
           </section>
 
           <section className="surface rounded-xl p-7">
-            <h2 className="text-sm font-semibold text-brand">Account</h2>
+            <h2 className="text-sm font-semibold text-brand">
+              {t("dash.account")}
+            </h2>
             <dl className="mt-6 space-y-5 text-sm">
               <div>
                 <dt className="text-muted">
-                  {isCandidate ? "Full name" : "Company name"}
+                  {isCandidate ? t("auth.fullName") : t("auth.companyName")}
                 </dt>
                 <dd className="mt-1 text-text">{user.fullName}</dd>
               </div>
               <div>
-                <dt className="text-muted">Email</dt>
+                <dt className="text-muted">{t("auth.email")}</dt>
                 <dd className="mt-1 break-all text-text">{user.email}</dd>
               </div>
               <div>
-                <dt className="text-muted">Account type</dt>
+                <dt className="text-muted">{t("dash.accountType")}</dt>
                 <dd className="mt-1 font-semibold text-brand-soft">
-                  {isCandidate ? "Candidate" : "Company"}
+                  {isCandidate ? t("role.candidate") : t("role.company")}
                 </dd>
               </div>
             </dl>
@@ -343,7 +349,7 @@ export default function DashboardPage() {
               href={isCandidate ? "/dashboard/profile" : "/dashboard/company"}
               className="text-sm font-medium text-brand underline underline-offset-4 transition hover:text-brand-soft"
             >
-              {isCandidate ? "Edit your profile" : "Edit company profile"}
+              {isCandidate ? t("dash.editYourProfile") : t("dash.editCompany")}
             </Link>
           </section>
         </div>

@@ -6,26 +6,30 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import Logo from "@/components/logo";
 import NotificationBell from "@/components/notification-bell";
+import LanguageToggle from "@/components/language-toggle";
+import { useT } from "@/lib/i18n/context";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
-const candidateNav = [
-  { label: "Overview", href: "/dashboard" },
-  { label: "Browse jobs", href: "/dashboard/browse" },
-  { label: "My applications", href: "/dashboard/applications" },
-  { label: "Invitations", href: "/dashboard/invitations" },
-  { label: "Profile", href: "/dashboard/profile" },
+const candidateNav: { key: TranslationKey; href: string }[] = [
+  { key: "nav.overview", href: "/dashboard" },
+  { key: "nav.browse", href: "/dashboard/browse" },
+  { key: "nav.myApplications", href: "/dashboard/applications" },
+  { key: "nav.invitations", href: "/dashboard/invitations" },
+  { key: "nav.profile", href: "/dashboard/profile" },
 ];
 
-const companyNav = [
-  { label: "Overview", href: "/dashboard" },
-  { label: "My postings", href: "/dashboard/jobs" },
-  { label: "Find talent", href: "/dashboard/talent" },
-  { label: "Applicants", href: "/dashboard/applicants" },
-  { label: "Company profile", href: "/dashboard/company" },
+const companyNav: { key: TranslationKey; href: string }[] = [
+  { key: "nav.overview", href: "/dashboard" },
+  { key: "nav.myPostings", href: "/dashboard/jobs" },
+  { key: "nav.findTalent", href: "/dashboard/talent" },
+  { key: "nav.applicants", href: "/dashboard/applicants" },
+  { key: "nav.companyProfile", href: "/dashboard/company" },
 ];
 
 export default function DashboardNav() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
+  const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (!user) return null;
@@ -65,7 +69,7 @@ export default function DashboardNav() {
                       : "relative text-[15px] font-medium tracking-tight text-muted transition-colors duration-200 group-hover:text-brand group-hover:[text-shadow:0_0_14px_rgba(46,116,181,0.65)]"
                   }
                 >
-                  {item.label}
+                  {t(item.key)}
                 </span>
 
                 <span
@@ -82,6 +86,8 @@ export default function DashboardNav() {
 
         {/* Far right */}
         <div className="flex items-center gap-2.5 justify-self-end">
+          <LanguageToggle className="hidden sm:inline-flex" />
+
           <NotificationBell />
 
           <span className="hidden h-6 w-px bg-line sm:block" />
@@ -89,17 +95,17 @@ export default function DashboardNav() {
           <div className="relative">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-2.5 transition hover:bg-panel-2"
+              className="flex items-center gap-2.5 rounded-full py-1 ps-1 pe-2.5 transition hover:bg-panel-2"
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/15 text-xs font-bold text-brand ring-1 ring-brand/25">
                 {initials}
               </span>
-              <span className="hidden text-left lg:block">
+              <span className="hidden text-start lg:block">
                 <span className="block max-w-32 truncate text-sm font-medium leading-tight text-text">
                   {user.fullName}
                 </span>
                 <span className="block text-[11px] leading-tight text-brand-soft">
-                  {isCandidate ? "Candidate" : "Company"}
+                  {isCandidate ? t("role.candidate") : t("role.company")}
                 </span>
               </span>
               <svg
@@ -126,7 +132,7 @@ export default function DashboardNav() {
                   className="fixed inset-0 z-40"
                   onClick={() => setMenuOpen(false)}
                 />
-                <div className="absolute right-0 top-12 z-50 w-60 overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl">
+                <div className="absolute end-0 top-12 z-50 w-60 overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl">
                   <div className="border-b border-line px-4 py-3.5">
                     <p className="truncate text-sm font-semibold text-text">
                       {user.fullName}
@@ -146,16 +152,16 @@ export default function DashboardNav() {
                             : "block px-4 py-3 text-sm text-muted transition hover:bg-panel-2 hover:text-text"
                         }
                       >
-                        {item.label}
+                        {t(item.key)}
                       </Link>
                     ))}
                   </div>
 
                   <button
                     onClick={logout}
-                    className="w-full px-4 py-3.5 text-left text-sm text-muted transition hover:bg-panel-2 hover:text-text"
+                    className="w-full px-4 py-3.5 text-start text-sm text-muted transition hover:bg-panel-2 hover:text-text"
                   >
-                    Sign out
+                    {t("common.signOut")}
                   </button>
                 </div>
               </>

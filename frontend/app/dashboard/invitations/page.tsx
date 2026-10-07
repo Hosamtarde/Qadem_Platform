@@ -9,6 +9,8 @@ import {
   type Invitation,
 } from "@/lib/invitations";
 import { ApiRequestError } from "@/lib/api";
+import { useT } from "@/lib/i18n/context";
+import { cityKey } from "@/lib/i18n/dictionaries";
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "badge badge-neutral",
@@ -22,6 +24,7 @@ function daysLeft(iso: string): number {
 }
 
 export default function MyInvitationsPage() {
+  const t = useT();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -43,7 +46,7 @@ export default function MyInvitationsPage() {
     if (!user || user.role !== "CANDIDATE") return;
     listMyInvitations()
       .then(setInvitations)
-      .catch(() => setError("Could not load your invitations."))
+      .catch(() => setError(t("inv.loadError")))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -65,7 +68,7 @@ export default function MyInvitationsPage() {
       if (err instanceof ApiRequestError) {
         setError(err.messages.join(", "));
       } else {
-        setError("Could not send your answer.");
+        setError(t("inv.answerError"));
       }
     } finally {
       setWorking(null);
@@ -75,7 +78,7 @@ export default function MyInvitationsPage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading</p>
+        <p className="text-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -86,17 +89,15 @@ export default function MyInvitationsPage() {
   return (
     <>
       <header className="border-b border-line px-6 py-5 lg:px-10">
-        <p className="text-sm text-muted">Candidate workspace</p>
+        <p className="text-sm text-muted">{t("dash.candidateSpace")}</p>
         <h1 className="mt-1 font-display text-2xl font-bold text-text">
-          Invitations
+          {t("nav.invitations")}
         </h1>
       </header>
 
       <main className="px-6 py-8 lg:px-10">
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Companies that found your profile and want you to apply. Accepting
-          puts you straight into their pipeline and shares your contact details
-          with them.
+          {t("inv.intro")}
         </p>
 
         {error && (
@@ -107,10 +108,9 @@ export default function MyInvitationsPage() {
 
         {invitations.length === 0 && (
           <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
-            <p className="font-semibold text-text">No invitations yet</p>
+            <p className="font-semibold text-text">{t("inv.emptyTitle")}</p>
             <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">
-              Turn on Open to work in your profile so companies searching for
-              talent can find you.
+              {t("inv.emptyBody")}
             </p>
           </div>
         )}
@@ -118,7 +118,7 @@ export default function MyInvitationsPage() {
         {pending.length > 0 && (
           <section className="mt-6">
             <h2 className="text-sm font-semibold text-brand">
-              Waiting for your answer
+              {t("inv.waiting")}
             </h2>
 
             <div className="mt-4 space-y-4">
@@ -136,7 +136,9 @@ export default function MyInvitationsPage() {
                         </h3>
                         <p className="mt-1 text-sm text-muted">
                           {inv.company?.name}
-                          {inv.job?.location ? ` · ${inv.job.location}` : ""}
+                          {inv.job?.location
+                            ? ` · ${t(cityKey(inv.job.location))}`
+                            : ""}
                         </p>
                       </div>
 
@@ -148,8 +150,10 @@ export default function MyInvitationsPage() {
                         }
                       >
                         {left <= 0
-                          ? "Expires today"
-                          : `${left} ${left === 1 ? "day" : "days"} left`}
+                          ? t("inv.expiresToday")
+                          : t(left === 1 ? "inv.dayLeft" : "inv.daysLeft", {
+                              count: left,
+                            })}
                       </span>
                     </div>
 
@@ -168,7 +172,7 @@ export default function MyInvitationsPage() {
                     {decliningId === inv.id ? (
                       <div className="mt-5">
                         <label className="text-xs font-medium text-muted">
-                          Reason (optional, shared with the company)
+                          {t("inv.reasonLabel")}
                         </label>
                         <input
                           type="text"
@@ -176,7 +180,7 @@ export default function MyInvitationsPage() {
                           onChange={(e) => setReason(e.target.value)}
                           maxLength={300}
                           className="mt-2 w-full rounded-lg border border-line bg-panel px-4 py-2.5 text-sm text-text placeholder:text-muted/50 outline-none transition focus:border-brand"
-                          placeholder="Not the right fit right now"
+                          placeholder={t("inv.reasonPlaceholder")}
                         />
                         <div className="mt-3 flex gap-2.5">
                           <button
@@ -186,7 +190,7 @@ export default function MyInvitationsPage() {
                             disabled={working === inv.id}
                             className="rounded-lg border border-danger/40 px-5 py-2 text-sm text-danger transition hover:bg-danger/10 disabled:opacity-50"
                           >
-                            {working === inv.id ? "Sending" : "Confirm decline"}
+                            {working === inv.id ? t("inv.sending") : t("inv.confirmDecline")}
                           </button>
                           <button
                             onClick={() => {
@@ -195,7 +199,7 @@ export default function MyInvitationsPage() {
                             }}
                             className="btn-ghost rounded-lg px-5 py-2 text-sm"
                           >
-                            Back
+                            {t("common.back")}
                           </button>
                         </div>
                       </div>
@@ -206,13 +210,13 @@ export default function MyInvitationsPage() {
                           disabled={working === inv.id}
                           className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold disabled:opacity-50"
                         >
-                          {working === inv.id ? "Accepting" : "Accept"}
+                          {working === inv.id ? t("inv.accepting") : t("inv.accept")}
                         </button>
                         <button
                           onClick={() => setDecliningId(inv.id)}
                           className="btn-ghost rounded-lg px-6 py-2.5 text-sm"
                         >
-                          Decline
+                          {t("inv.decline")}
                         </button>
                       </div>
                     )}
@@ -225,7 +229,7 @@ export default function MyInvitationsPage() {
 
         {past.length > 0 && (
           <section className="mt-10">
-            <h2 className="text-sm font-semibold text-muted">Past</h2>
+            <h2 className="text-sm font-semibold text-muted">{t("inv.past")}</h2>
 
             <div className="mt-4 overflow-hidden rounded-xl border border-line">
               <ul className="divide-y divide-line">
@@ -244,7 +248,7 @@ export default function MyInvitationsPage() {
                       </p>
                     </div>
                     <span className={STATUS_STYLES[inv.status]}>
-                      {inv.status.charAt(0) + inv.status.slice(1).toLowerCase()}
+                      {t(`invStatus.${inv.status.toLowerCase()}`)}
                     </span>
                   </li>
                 ))}

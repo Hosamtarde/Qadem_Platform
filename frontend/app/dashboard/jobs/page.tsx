@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { createJob, deleteJob, listMyJobs, updateJob } from "@/lib/jobs";
 import { ApiRequestError } from "@/lib/api";
-import { Job, JobType, JOB_TYPE_LABELS } from "@/lib/types";
+import { Job, JobType } from "@/lib/types";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, jobTypeKey } from "@/lib/i18n/dictionaries";
 
 const TYPES: JobType[] = ["FULL_TIME", "PART_TIME", "INTERNSHIP"];
 
 export default function ManageJobsPage() {
+  const t = useT();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -39,7 +42,7 @@ export default function ManageJobsPage() {
     if (!user || user.role !== "COMPANY") return;
     listMyJobs()
       .then(setJobs)
-      .catch(() => setError("Could not load your postings."))
+      .catch(() => setError(t("post.loadError")))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -107,7 +110,7 @@ export default function ManageJobsPage() {
       if (err instanceof ApiRequestError) {
         setError(err.messages.join(", "));
       } else {
-        setError("Could not save the role.");
+        setError(t("post.saveError"));
       }
     } finally {
       setSaving(false);
@@ -119,17 +122,17 @@ export default function ManageJobsPage() {
       const updated = await updateJob(job.id, { isActive: !job.isActive });
       setJobs(jobs.map((j) => (j.id === job.id ? updated : j)));
     } catch {
-      setError("Could not update the posting.");
+      setError(t("post.updateError"));
     }
   }
 
   async function handleDelete(job: Job) {
-    if (!confirm(`Delete "${job.title}"? This cannot be undone.`)) return;
+    if (!confirm(t("post.confirmDelete", { title: job.title }))) return;
     try {
       await deleteJob(job.id);
       setJobs(jobs.filter((j) => j.id !== job.id));
     } catch {
-      setError("Could not delete the posting.");
+      setError(t("post.deleteError"));
     }
   }
 
@@ -139,7 +142,7 @@ export default function ManageJobsPage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading</p>
+        <p className="text-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -150,9 +153,9 @@ export default function ManageJobsPage() {
     <>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-5 lg:px-10">
         <div>
-          <p className="text-sm text-muted">Company workspace</p>
+          <p className="text-sm text-muted">{t("dash.companySpace")}</p>
           <h1 className="mt-1 font-display text-2xl font-bold text-text">
-            My postings
+            {t("nav.myPostings")}
           </h1>
         </div>
         <button
@@ -163,13 +166,13 @@ export default function ManageJobsPage() {
               : "btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
           }
         >
-          {formOpen ? "Cancel" : "Publish a role"}
+          {formOpen ? t("common.cancel") : t("post.publishRole")}
         </button>
       </header>
 
       <main className="px-6 py-8 lg:px-10">
         <p className="text-sm text-muted">
-          {jobs.length} total, {liveCount} live
+          {t("post.summary", { total: jobs.length, live: liveCount })}
         </p>
 
         {error && (
@@ -181,13 +184,13 @@ export default function ManageJobsPage() {
         {formOpen && (
           <form onSubmit={handleSubmit} className="surface mt-6 rounded-xl p-7">
             <h2 className="text-sm font-semibold text-brand">
-              {editingId ? "Edit role" : "New role"}
+              {editingId ? t("post.editRole") : t("post.newRole")}
             </h2>
 
             <div className="mt-6 space-y-5">
               <div className="grid gap-5 sm:grid-cols-[2fr_1fr]">
                 <div>
-                  <label className="text-sm text-muted">Title</label>
+                  <label className="text-sm text-muted">{t("post.titleLabel")}</label>
                   <input
                     type="text"
                     required
@@ -195,24 +198,24 @@ export default function ManageJobsPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className={field}
-                    placeholder="Backend Engineer"
+                    placeholder={t("post.titlePlaceholder")}
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted">Location</label>
+                  <label className="text-sm text-muted">{t("job.location")}</label>
                   <input
                     type="text"
                     required
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className={field}
-                    placeholder="Ramallah"
+                    placeholder={t("city.ramallah")}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm text-muted">Description</label>
+                <label className="text-sm text-muted">{t("post.description")}</label>
                 <textarea
                   required
                   minLength={20}
@@ -220,43 +223,43 @@ export default function ManageJobsPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className={field}
-                  placeholder="What the person will work on day to day."
+                  placeholder={t("post.descriptionPlaceholder")}
                 />
               </div>
 
               <div>
-                <label className="text-sm text-muted">Requirements</label>
+                <label className="text-sm text-muted">{t("job.requirements")}</label>
                 <textarea
                   rows={2}
                   value={requirements}
                   onChange={(e) => setRequirements(e.target.value)}
                   className={field}
-                  placeholder="Skills and experience you expect."
+                  placeholder={t("post.requirementsPlaceholder")}
                 />
               </div>
 
               <div className="grid gap-5 sm:grid-cols-[2fr_1fr_1fr]">
                 <div>
-                  <label className="text-sm text-muted">Type</label>
+                  <label className="text-sm text-muted">{t("job.type")}</label>
                   <div className="mt-2 grid grid-cols-3 gap-1 rounded-lg border border-line bg-panel p-1">
-                    {TYPES.map((t) => (
+                    {TYPES.map((jt) => (
                       <button
-                        key={t}
+                        key={jt}
                         type="button"
-                        onClick={() => setType(t)}
+                        onClick={() => setType(jt)}
                         className={
-                          type === t
+                          type === jt
                             ? "btn-primary rounded-md py-2 text-xs font-semibold"
                             : "rounded-md py-2 text-xs text-muted transition hover:text-text"
                         }
                       >
-                        {JOB_TYPE_LABELS[t]}
+                        {t(jobTypeKey(jt))}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-muted">Salary from</label>
+                  <label className="text-sm text-muted">{t("post.salaryFrom")}</label>
                   <input
                     type="number"
                     min={0}
@@ -266,7 +269,7 @@ export default function ManageJobsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-muted">Salary to</label>
+                  <label className="text-sm text-muted">{t("post.salaryTo")}</label>
                   <input
                     type="number"
                     min={0}
@@ -284,7 +287,7 @@ export default function ManageJobsPage() {
                 disabled={saving}
                 className="btn-primary rounded-lg px-7 py-2.5 text-sm font-semibold disabled:opacity-50"
               >
-                {saving ? "Saving" : editingId ? "Save changes" : "Publish role"}
+                {saving ? t("common.saving") : editingId ? t("common.saveChanges") : t("post.publish")}
               </button>
               <button
                 type="button"
@@ -299,21 +302,19 @@ export default function ManageJobsPage() {
 
         {jobs.length === 0 && !formOpen && (
           <div className="surface mt-6 rounded-xl px-8 py-16 text-center">
-            <p className="font-semibold text-text">No roles published yet</p>
-            <p className="mt-2 text-sm text-muted">
-              Publish your first opening and it will appear on the public board.
-            </p>
+            <p className="font-semibold text-text">{t("post.emptyTitle")}</p>
+            <p className="mt-2 text-sm text-muted">{t("post.emptyBody")}</p>
           </div>
         )}
 
         {jobs.length > 0 && (
           <div className="mt-6 overflow-hidden rounded-xl border border-line">
             <div className="hidden border-b border-line bg-panel-2 px-5 py-3 text-xs font-medium text-muted sm:grid sm:grid-cols-[1fr_130px_110px_120px_180px]">
-              <span>Role</span>
-              <span>Type</span>
-              <span>Status</span>
-              <span>Salary</span>
-              <span className="text-right">Actions</span>
+              <span>{t("invite.role")}</span>
+              <span>{t("job.type")}</span>
+              <span>{t("post.status")}</span>
+              <span>{t("job.salary")}</span>
+              <span className="text-end">{t("post.actions")}</span>
             </div>
 
             <ul className="divide-y divide-line">
@@ -326,11 +327,13 @@ export default function ManageJobsPage() {
                     <p className="truncate text-sm font-semibold text-text">
                       {job.title}
                     </p>
-                    <p className="mt-0.5 text-xs text-muted">{job.location}</p>
+                    <p className="mt-0.5 text-xs text-muted">
+                      {t(cityKey(job.location))}
+                    </p>
                   </div>
 
                   <span className="text-xs text-muted">
-                    {JOB_TYPE_LABELS[job.type]}
+                    {t(jobTypeKey(job.type))}
                   </span>
 
                   <span
@@ -340,13 +343,13 @@ export default function ManageJobsPage() {
                         : "badge badge-neutral w-fit"
                     }
                   >
-                    {job.isActive ? "Live" : "Paused"}
+                    {job.isActive ? t("post.live") : t("post.paused")}
                   </span>
 
                   <span className="text-xs text-muted">
                     {job.salaryMin || job.salaryMax
                       ? `${job.salaryMin ?? "?"} - ${job.salaryMax ?? "?"}`
-                      : "Not set"}
+                      : t("post.notSet")}
                   </span>
 
                   <div className="flex flex-wrap gap-1.5 sm:justify-end">
@@ -354,19 +357,19 @@ export default function ManageJobsPage() {
                       onClick={() => openEdit(job)}
                       className="rounded-md border border-line px-3 py-1.5 text-xs text-muted transition hover:border-brand/50 hover:text-text"
                     >
-                      Edit
+                      {t("common.edit")}
                     </button>
                     <button
                       onClick={() => handleToggle(job)}
                       className="rounded-md border border-line px-3 py-1.5 text-xs text-muted transition hover:border-brand/50 hover:text-text"
                     >
-                      {job.isActive ? "Pause" : "Publish"}
+                      {job.isActive ? t("post.pause") : t("post.publishShort")}
                     </button>
                     <button
                       onClick={() => handleDelete(job)}
                       className="rounded-md border border-danger/30 px-3 py-1.5 text-xs text-danger/80 transition hover:bg-danger/10 hover:text-danger"
                     >
-                      Delete
+                      {t("common.delete")}
                     </button>
                   </div>
                 </li>

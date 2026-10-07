@@ -7,9 +7,12 @@ import { useAuth } from "@/lib/auth-context";
 import { getMyCompany, updateMyCompany } from "@/lib/companies";
 import { listMyJobs } from "@/lib/jobs";
 import { ApiRequestError } from "@/lib/api";
-import { Company, Job, JOB_TYPE_LABELS } from "@/lib/types";
+import { Company, Job } from "@/lib/types";
+import { useT } from "@/lib/i18n/context";
+import { cityKey, jobTypeKey } from "@/lib/i18n/dictionaries";
 
 export default function CompanyProfilePage() {
+  const t = useT();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -40,7 +43,7 @@ export default function CompanyProfilePage() {
         setCompany(c);
         setJobs(j);
       })
-      .catch(() => setError("Could not load your company profile."))
+      .catch(() => setError(t("company.loadError")))
       .finally(() => setLoading(false));
   }, [user]);
 
@@ -73,7 +76,7 @@ export default function CompanyProfilePage() {
       if (err instanceof ApiRequestError) {
         setError(err.messages.join(", "));
       } else {
-        setError("Could not save your changes.");
+        setError(t("company.saveError"));
       }
     } finally {
       setSaving(false);
@@ -86,7 +89,7 @@ export default function CompanyProfilePage() {
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Loading</p>
+        <p className="text-muted">{t("common.loading")}</p>
       </div>
     );
   }
@@ -104,9 +107,9 @@ export default function CompanyProfilePage() {
     <>
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-line px-6 py-5 lg:px-10">
         <div>
-          <p className="text-sm text-muted">Company workspace</p>
+          <p className="text-sm text-muted">{t("dash.companySpace")}</p>
           <h1 className="mt-1 font-display text-2xl font-bold text-text">
-            Company profile
+            {t("nav.companyProfile")}
           </h1>
         </div>
         {!editing && (
@@ -114,7 +117,7 @@ export default function CompanyProfilePage() {
             onClick={startEditing}
             className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold"
           >
-            Edit profile
+            {t("dash.editProfile")}
           </button>
         )}
       </header>
@@ -122,13 +125,13 @@ export default function CompanyProfilePage() {
       <main className="px-6 py-8 lg:px-10">
         <p className="text-sm text-muted">
           {editing
-            ? "Changes are visible to candidates as soon as you save."
-            : "This is what candidates see next to your openings."}
+            ? t("company.editingNote")
+            : t("company.viewNote")}
         </p>
 
         {saved && !editing && (
           <p className="mt-6 rounded-lg border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">
-            Profile saved
+            {t("company.saved")}
           </p>
         )}
 
@@ -150,7 +153,9 @@ export default function CompanyProfilePage() {
                     {company.name}
                   </h2>
                   <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted">
-                    {company.location ? <span>{company.location}</span> : null}
+                    {company.location ? (
+                      <span>{t(cityKey(company.location))}</span>
+                    ) : null}
                     {company.website ? (
                       <a href={company.website} target="_blank" rel="noreferrer" className="text-brand underline underline-offset-4 transition hover:text-brand-soft">{cleanUrl}</a>
                     ) : null}
@@ -166,29 +171,28 @@ export default function CompanyProfilePage() {
                 </p>
               ) : (
                 <p className="text-sm text-muted/60">
-                  No description yet. Candidates see this space next to every
-                  role you publish, so it is worth filling in.
+                  {t("company.noDescription")}
                 </p>
               )}
             </section>
 
             <div className="mt-4 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
               <div className="bg-panel p-6">
-                <p className="text-sm text-muted">Total postings</p>
+                <p className="text-sm text-muted">{t("dash.totalPostings")}</p>
                 <p className="mt-2 font-display text-2xl font-bold text-text">
                   {jobs.length}
                 </p>
               </div>
               <div className="bg-panel p-6">
-                <p className="text-sm text-muted">Live right now</p>
+                <p className="text-sm text-muted">{t("company.liveNow")}</p>
                 <p className="mt-2 font-display text-2xl font-bold text-text">
                   {liveJobs.length}
                 </p>
               </div>
               <div className="bg-panel p-6">
-                <p className="text-sm text-muted">Location</p>
+                <p className="text-sm text-muted">{t("job.location")}</p>
                 <p className="mt-2 font-display text-2xl font-bold text-text">
-                  {company.location ?? "-"}
+                  {company.location ? t(cityKey(company.location)) : "-"}
                 </p>
               </div>
             </div>
@@ -196,20 +200,20 @@ export default function CompanyProfilePage() {
             <section className="mt-8">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-brand">
-                  Live openings
+                  {t("company.liveOpenings")}
                 </h2>
                 <Link
                   href="/dashboard/jobs"
                   className="text-sm text-muted underline underline-offset-4 transition hover:text-text"
                 >
-                  Manage postings
+                  {t("dash.managePostings")}
                 </Link>
               </div>
 
               {liveJobs.length === 0 ? (
                 <div className="surface mt-4 rounded-xl px-6 py-12 text-center">
                   <p className="text-sm text-muted">
-                    No live openings right now.
+                    {t("company.noLiveOpenings")}
                   </p>
                 </div>
               ) : (
@@ -224,11 +228,11 @@ export default function CompanyProfilePage() {
                           {job.title}
                         </p>
                         <p className="mt-1 text-xs text-muted">
-                          {job.location}
+                          {t(cityKey(job.location))}
                         </p>
                       </div>
                       <span className="badge badge-neutral">
-                        {JOB_TYPE_LABELS[job.type]}
+                        {t(jobTypeKey(job.type))}
                       </span>
                     </li>
                   ))}
@@ -242,7 +246,7 @@ export default function CompanyProfilePage() {
           <form onSubmit={handleSubmit} className="surface mt-6 rounded-xl p-8">
             <div className="space-y-6">
               <div>
-                <label className="text-sm text-muted">Company name</label>
+                <label className="text-sm text-muted">{t("auth.companyName")}</label>
                 <input
                   type="text"
                   required
@@ -254,30 +258,30 @@ export default function CompanyProfilePage() {
               </div>
 
               <div>
-                <label className="text-sm text-muted">About the company</label>
+                <label className="text-sm text-muted">{t("company.about")}</label>
                 <textarea
                   rows={6}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className={field}
-                  placeholder="What your company does, who works there, what you are building."
+                  placeholder={t("company.aboutPlaceholder")}
                 />
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm text-muted">Location</label>
+                  <label className="text-sm text-muted">{t("job.location")}</label>
                   <input
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     className={field}
-                    placeholder="Ramallah"
+                    placeholder={t("city.ramallah")}
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm text-muted">Website</label>
+                  <label className="text-sm text-muted">{t("company.website")}</label>
                   <input
                     type="url"
                     value={website}
@@ -301,14 +305,14 @@ export default function CompanyProfilePage() {
                 disabled={saving}
                 className="btn-primary rounded-lg px-7 py-3 font-semibold disabled:opacity-50"
               >
-                {saving ? "Saving" : "Save changes"}
+                {saving ? t("common.saving") : t("common.saveChanges")}
               </button>
               <button
                 type="button"
                 onClick={() => setEditing(false)}
                 className="btn-ghost rounded-lg px-7 py-3 font-semibold"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </form>

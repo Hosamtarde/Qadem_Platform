@@ -9,20 +9,23 @@ import {
   markAsRead,
   type Notification,
 } from "@/lib/notifications";
+import { useT } from "@/lib/i18n/context";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
 const POLL_MS = 45_000;
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string): { key: TranslationKey; count: number } {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return { key: "time.justNow", count: 0 };
+  if (mins < 60) return { key: "time.minutes", count: mins };
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return { key: "time.hours", count: hours };
+  return { key: "time.days", count: Math.floor(hours / 24) };
 }
 
 export default function NotificationBell() {
+  const t = useT();
   const router = useRouter();
   const [count, setCount] = useState(0);
   const [items, setItems] = useState<Notification[]>([]);
@@ -104,7 +107,9 @@ export default function NotificationBell() {
       <button
         onClick={toggle}
         aria-label={
-          count > 0 ? `${count} unread notifications` : "Notifications"
+          count > 0
+            ? t("bell.unread", { count })
+            : t("bell.title")
         }
         className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted transition hover:bg-panel-2 hover:text-text"
       >
@@ -123,18 +128,18 @@ export default function NotificationBell() {
         </svg>
 
         {count > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(46,116,181,0.8)]">
+          <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white shadow-[0_0_10px_rgba(46,116,181,0.8)]">
             {count > 9 ? "9+" : count}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-[25rem] overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl">
+        <div className="absolute end-0 top-12 z-50 w-[25rem] overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl">
           <div className="flex items-center justify-between px-5 pb-3 pt-4">
             <div className="flex items-center gap-2">
               <h3 className="text-[15px] font-semibold tracking-tight text-text">
-                Notifications
+                {t("bell.title")}
               </h3>
               {count > 0 && (
                 <span className="rounded-full bg-brand/15 px-2 py-0.5 text-[11px] font-semibold text-brand">
@@ -147,7 +152,7 @@ export default function NotificationBell() {
                 onClick={readAll}
                 className="text-xs font-medium text-muted transition hover:text-brand"
               >
-                Mark all read
+                {t("bell.markAllRead")}
               </button>
             )}
           </div>
@@ -157,7 +162,7 @@ export default function NotificationBell() {
           <div className="max-h-[26rem] overflow-y-auto">
             {loading && (
               <p className="px-5 py-10 text-center text-sm text-muted">
-                Loading
+                {t("common.loading")}
               </p>
             )}
 
@@ -179,9 +184,11 @@ export default function NotificationBell() {
                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                   </svg>
                 </div>
-                <p className="text-sm font-medium text-text">All caught up</p>
+                <p className="text-sm font-medium text-text">
+                  {t("bell.empty")}
+                </p>
                 <p className="mt-1 text-xs leading-relaxed text-muted">
-                  Updates on your applications will show up here.
+                  {t("bell.emptyBody")}
                 </p>
               </div>
             )}
@@ -246,10 +253,15 @@ export default function NotificationBell() {
                               : "text-[10px] font-bold uppercase tracking-wider text-brand"
                           }
                         >
-                          {isStatus ? "Status update" : "New applicant"}
+                          {isStatus
+                            ? t("bell.statusUpdate")
+                            : t("bell.newApplicant")}
                         </span>
                         <span className="text-[10px] text-muted/40">
-                          {timeAgo(item.createdAt)}
+                          {(() => {
+                            const ago = timeAgo(item.createdAt);
+                            return t(ago.key, { count: ago.count });
+                          })()}
                         </span>
                       </span>
 

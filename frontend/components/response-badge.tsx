@@ -1,3 +1,7 @@
+"use client";
+
+import { useT } from "@/lib/i18n/context";
+
 export default function ResponseBadge({
   rate,
   avgDays,
@@ -9,6 +13,8 @@ export default function ResponseBadge({
   sampleSize?: number;
   size?: "sm" | "md";
 }) {
+  const t = useT();
+
   if (rate === null) {
     return (
       <span
@@ -30,7 +36,7 @@ export default function ResponseBadge({
           <circle cx="12" cy="12" r="10" />
           <path d="M12 16v-4M12 8h.01" />
         </svg>
-        Too few applications to rate
+        {t("score.tooFew")}
       </span>
     );
   }
@@ -49,8 +55,8 @@ export default function ResponseBadge({
       className={`inline-flex items-stretch overflow-hidden rounded-md ring-1 ${tone.ring} ${tone.bg}`}
       title={
         sampleSize
-          ? `Based on ${sampleSize} applications`
-          : "Reply rate on applications received"
+          ? t("score.basedOn", { count: sampleSize })
+          : t("score.title")
       }
     >
       <span
@@ -76,7 +82,7 @@ export default function ResponseBadge({
               : "text-[9px] font-medium uppercase tracking-wide text-muted/60"
           }
         >
-          replied
+          {t("score.replied")}
         </span>
       </span>
 
@@ -106,7 +112,9 @@ export default function ResponseBadge({
                   : "text-[9px] font-medium uppercase tracking-wide text-muted/60"
               }
             >
-              {avgDays < 1 || Math.round(avgDays) === 1 ? "day" : "days"}
+              {avgDays < 1 || Math.round(avgDays) === 1
+                ? t("score.day")
+                : t("score.days")}
             </span>
           </span>
         </>

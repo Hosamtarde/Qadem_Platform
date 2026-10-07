@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/context";
+
 import { useEffect, useState } from "react";
 import { listMyJobs } from "@/lib/jobs";
 import { inviteCandidate } from "@/lib/invitations";
@@ -16,6 +18,7 @@ export default function InviteDialog({
   onClose: () => void;
   onSent: (candidateId: string) => void;
 }) {
+  const t = useT();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobId, setJobId] = useState("");
   const [message, setMessage] = useState("");
@@ -30,7 +33,7 @@ export default function InviteDialog({
         setJobs(live);
         if (live.length > 0) setJobId(live[0].id);
       })
-      .catch(() => setError("Could not load your postings."))
+      .catch(() => setError(t("invite.loadError")))
       .finally(() => setLoading(false));
   }, []);
 
@@ -50,7 +53,7 @@ export default function InviteDialog({
       if (err instanceof ApiRequestError) {
         setError(err.messages.join(", "));
       } else {
-        setError("Could not send the invitation.");
+        setError(t("invite.sendError"));
       }
     } finally {
       setSending(false);
@@ -69,27 +72,30 @@ export default function InviteDialog({
 
       <div className="surface relative z-10 w-full max-w-lg rounded-2xl p-7">
         <h2 className="font-display text-xl font-bold text-text">
-          Invite {candidate.fullName}
+          {t("invite.title", { name: candidate.fullName })}
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">
-          They decide whether to accept. Their contact details and resume
-          become visible to you only if they do.
+          {t("invite.body")}
         </p>
 
-        {loading && <p className="mt-6 text-sm text-muted">Loading roles</p>}
+        {loading && (
+          <p className="mt-6 text-sm text-muted">{t("invite.loadingRoles")}</p>
+        )}
 
         {!loading && jobs.length === 0 && (
           <div className="mt-6 rounded-lg border border-line bg-panel-2 px-4 py-5 text-center">
-            <p className="text-sm font-medium text-text">No live postings</p>
+            <p className="text-sm font-medium text-text">
+              {t("invite.noPostings")}
+            </p>
             <p className="mt-1 text-xs text-muted">
-              Publish a role before inviting candidates.
+              {t("invite.noPostingsBody")}
             </p>
           </div>
         )}
 
         {!loading && jobs.length > 0 && (
           <form onSubmit={handleSend} className="mt-6">
-            <label className="text-xs font-medium text-muted">Role</label>
+            <label className="text-xs font-medium text-muted">{t("invite.role")}</label>
             <select
               value={jobId}
               onChange={(e) => setJobId(e.target.value)}
@@ -103,14 +109,14 @@ export default function InviteDialog({
             </select>
 
             <label className="mt-5 block text-xs font-medium text-muted">
-              Message (optional)
+              {t("invite.message")}
             </label>
             <textarea
               rows={4}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className={field}
-              placeholder="Why you think they would be a good fit."
+              placeholder={t("invite.messagePlaceholder")}
             />
 
             {error && (
@@ -125,14 +131,14 @@ export default function InviteDialog({
                 disabled={sending || !jobId}
                 className="btn-primary rounded-lg px-6 py-2.5 text-sm font-semibold disabled:opacity-50"
               >
-                {sending ? "Sending" : "Send invitation"}
+                {sending ? t("invite.sending") : t("invite.send")}
               </button>
               <button
                 type="button"
                 onClick={onClose}
                 className="btn-ghost rounded-lg px-6 py-2.5 text-sm"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </form>
