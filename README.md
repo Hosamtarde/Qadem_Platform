@@ -4,7 +4,7 @@
 
 **A jobs and internships platform built for the Palestinian tech market.**
 
-Companies publish openings. Candidates apply and follow every application from sent to decided — in one place.
+Companies publish openings. Candidates apply and follow every application from sent to decided — in one place.k
 
 [![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?style=flat-square&logo=nestjs&logoColor=white)](https://nestjs.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
